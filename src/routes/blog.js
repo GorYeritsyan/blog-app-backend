@@ -1,0 +1,21 @@
+import { Router } from "express";
+import blogController from "../controllers/blog.controller.js";
+
+const router = Router();
+
+// Get All blog posts - GET /api/blog
+router.get("/", blogController.getBlogPosts);
+
+// Get blog post by id - GET /api/blog/:id
+router.get("/:id", blogController.getBlogPostById);
+
+// Create new blog post - POST /api/blog
+router.post("/", blogController.createBlogPost);
+
+// Update blog post - PUT /api/blog/:id
+router.put("/:id", blogController.updateBlogPost);
+
+// Delete blog post - DELETE /api/blog/:id
+router.delete("/:id", blogController.deleteBlogPost);
+
+export default router;
