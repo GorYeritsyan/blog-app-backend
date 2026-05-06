@@ -1,9 +1,11 @@
 import db from "../db/index.js";
 
 class BlogService {
+    // TODO: Implement filter, sort and pagination logic
     // Get all blog posts
-    async getBlogPosts() {
-        const { rows } = await db.query("SELECT * FROM blog");
+    async getBlogPosts({ limit = 10, offset = 0 }) {
+        const { rows } = await db.query("SELECT * FROM blog ORDER BY id DESC LIMIT $1 OFFSET $2",
+            [limit, offset]);
         return rows;
     }
 
@@ -19,13 +21,14 @@ class BlogService {
         return rows[0];
     }
 
+    // TODO: Check if this query safe from SQL Injection
+    // Update blog post by ID
     async updateBlogPost({ id, updateQueryString, values }) {
-        console.log(updateQueryString);
         const { rows } = await db.query(`UPDATE blog SET ${updateQueryString} WHERE id = ${id} RETURNING *`, values);
         return rows[0];
     }
 
-    // Delete blog post by id
+    // Delete blog post by ID
     async deleteBlogPost(id) {
         const { rows } = await db.query("DELETE FROM blog WHERE id = $1 RETURNING *", [id]);
         return rows[0];

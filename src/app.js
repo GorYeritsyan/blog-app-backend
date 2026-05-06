@@ -23,10 +23,6 @@ app.use(express.json());
 app.use(express.urlencoded());
 app.use(cors());
 
-app.get("/", (req, res) => {
-    res.send("Hello World!");
-});
-
 // Routes
 app.use("/api/blog", blogRouter);
 

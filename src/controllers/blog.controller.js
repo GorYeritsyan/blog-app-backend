@@ -1,5 +1,5 @@
 import blogService from "../services/blog.service.js";
-import {createBlogPostSchema, updateBlogPostSchema} from "../validations/index.js";
+import { createBlogPostSchema, updateBlogPostSchema } from "../validations/index.js";
 
 // TODO: Change fs logic to PostgreSQL queries
 // TODO: Add services layer for business logic
@@ -7,8 +7,8 @@ import {createBlogPostSchema, updateBlogPostSchema} from "../validations/index.j
 
 class BlogController {
     async getBlogPosts(req, res) {
-        const blogPosts = await blogService.getBlogPosts();
-        res.json(blogPosts);
+        const blogPosts = await blogService.getBlogPosts({ limit: 10, offset: 10 });
+        res.json({ success: true, data: blogPosts });
     }
 
     async getBlogPostById(req, res) {
@@ -21,7 +21,7 @@ class BlogController {
             return;
         }
 
-        res.json(blogPost);
+        res.json({ success: true, data: blogPost });
     }
 
     async createBlogPost(req, res) {
@@ -31,7 +31,7 @@ class BlogController {
 
             const newBlogPost = await blogService.createBlogPost(validBody);
 
-            res.json(newBlogPost);
+            res.json({ success: true, data: newBlogPost });
         } catch (err) {
             res.json({ success: false, message: err.message });
         }
@@ -61,7 +61,7 @@ class BlogController {
 
             // Handle Not found case
             if (!blogPost) {
-                res.json({ error: `Blog Post by ID ${id} not found` });
+                res.json({ success: false, message: `Blog Post by ID ${id} not found` });
                 return;
             }
 
@@ -70,10 +70,10 @@ class BlogController {
                 const updatedBlogPost = await blogService.updateBlogPost({ id, updateQueryString: queryUpdates.join(", "), values: queryValues });
                 res.status(200).json({ success: true, data: updatedBlogPost });
             } catch (err) {
-                res.status(500).json({ success: false, error: `Something went wrong when updating blog post by ID ${id}` });
+                res.status(500).json({ success: false, message: `Something went wrong when updating blog post by ID ${id}` });
             }
         } catch (err) {
-            res.json({ message: err.message });
+            res.json({ success: false, message: err.message });
         }
     }
 
@@ -82,7 +82,7 @@ class BlogController {
 
         const deletedBlogPost = await blogService.deleteBlogPost(id);
 
-        res.json(deletedBlogPost);
+        res.json({ success: true, data: deletedBlogPost });
     }
 }
 
