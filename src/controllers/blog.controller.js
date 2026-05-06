@@ -3,6 +3,8 @@ import path from "path";
 
 import readFileAsync from "../helpers/readFileAsync.js";
 import { __dirname } from "../app.js";
+import db from "../db/index.js";
+import blogService from "../services/blog.service.js";
 
 // TODO: Change fs logic to PostgreSQL queries
 // TODO: Add services layer for business logic
@@ -10,15 +12,14 @@ import { __dirname } from "../app.js";
 
 class BlogController {
     async getBlogPosts(req, res) {
-        const blogPosts = await readFileAsync("db", "blog.json");
+        const blogPosts = await blogService.getBlogPosts();
         res.json(blogPosts);
     }
 
     async getBlogPostById(req, res) {
         const { id } = req.params;
 
-        const blogPosts = await readFileAsync("db", "blog.json");
-        const blogPost = blogPosts.find(post => post.id === id);
+        const blogPost = await blogService.getBlogPostById(id);
 
         if (!blogPost) {
             res.json({ error: `Blog Post by ID "${id}" not found` })
