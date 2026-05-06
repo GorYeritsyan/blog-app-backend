@@ -1,10 +1,5 @@
-import fs from "fs/promises";
-import path from "path";
-
-import readFileAsync from "../helpers/readFileAsync.js";
-import { __dirname } from "../app.js";
-import db from "../db/index.js";
 import blogService from "../services/blog.service.js";
+import {createBlogPostSchema, updateBlogPostSchema} from "../validations/index.js";
 
 // TODO: Change fs logic to PostgreSQL queries
 // TODO: Add services layer for business logic
@@ -22,7 +17,7 @@ class BlogController {
         const blogPost = await blogService.getBlogPostById(id);
 
         if (!blogPost) {
-            res.json({ error: `Blog Post by ID "${id}" not found` })
+            res.json({ error: `Blog Post by ID ${id} not found` })
             return;
         }
 
@@ -30,51 +25,64 @@ class BlogController {
     }
 
     async createBlogPost(req, res) {
-        const { body } = req;
+        try {
+            // Validate request body
+            const validBody = await createBlogPostSchema.validateAsync(req.body);
 
-        // TODO: validate body
+            const newBlogPost = await blogService.createBlogPost(validBody);
 
-        const blogPosts = await readFileAsync("db", "blog.json");
-        const newBlogPost = { id: crypto.randomUUID(), ...body };
-
-        // Add new blog post to blog posts
-        blogPosts.push(newBlogPost);
-
-        // Update file
-        await fs.writeFile(path.join(__dirname, "db", "blog.json"), JSON.stringify(blogPosts, null, 2));
-        res.json(newBlogPost);
+            res.json(newBlogPost);
+        } catch (err) {
+            res.json({ success: false, message: err.message });
+        }
     }
 
     async updateBlogPost(req, res) {
         const { id } = req.params;
 
-        const blogPosts = await readFileAsync("db", "blog.json");
-        const blogPost = blogPosts.find(post => post.id === id);
+        // Create query strings from these arrays later on for update request
+        const queryUpdates = [];
+        const queryValues = [];
 
-        if (!blogPost) res.json({ message: `Blog post by ID ${id} not found` });
+        try {
+            // Validate request body
+            const validBody = await updateBlogPostSchema.validateAsync(req.body);
 
-        // Update blog post fields
-        Object.entries(req.body).forEach(([key, value]) => {
-            if (key in blogPost) {
-                blogPost[key] = value;
+            // Fill query arrays
+            Object.entries(validBody).forEach(([key, value]) => {
+                queryValues.push(value);
+
+                // title = $1, content = $2, etc...
+                queryUpdates.push(`${key} = $${queryValues.length}`);
+            });
+
+            // Get blog post by ID
+            const blogPost = await blogService.getBlogPostById(id);
+
+            // Handle Not found case
+            if (!blogPost) {
+                res.json({ error: `Blog Post by ID ${id} not found` });
+                return;
             }
-        });
 
-        // Update db
-        await fs.writeFile(path.join(__dirname, "db", "blog.json"), JSON.stringify(blogPosts, null, 2));
-
-        res.json(blogPost);
+            // Update blog post by id
+            try {
+                const updatedBlogPost = await blogService.updateBlogPost({ id, updateQueryString: queryUpdates.join(", "), values: queryValues });
+                res.status(200).json({ success: true, data: updatedBlogPost });
+            } catch (err) {
+                res.status(500).json({ success: false, error: `Something went wrong when updating blog post by ID ${id}` });
+            }
+        } catch (err) {
+            res.json({ message: err.message });
+        }
     }
 
     async deleteBlogPost(req, res) {
         const { id } = req.params;
 
-        const blogPosts = await readFileAsync("db", "blog.json");
-        const filteredBlogPosts = blogPosts.filter(post => post.id !== id);
+        const deletedBlogPost = await blogService.deleteBlogPost(id);
 
-        await fs.writeFile(path.join(__dirname, "db", "blog.json"), JSON.stringify(filteredBlogPosts, null, 2));
-
-        res.json(filteredBlogPosts);
+        res.json(deletedBlogPost);
     }
 }
 

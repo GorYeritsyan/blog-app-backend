@@ -12,8 +12,8 @@ router.get("/:id", blogController.getBlogPostById);
 // Create new blog post - POST /api/blog
 router.post("/", blogController.createBlogPost);
 
-// Update blog post - PUT /api/blog/:id
-router.put("/:id", blogController.updateBlogPost);
+// Update blog post - PATCH /api/blog/:id
+router.patch("/:id", blogController.updateBlogPost);
 
 // Delete blog post - DELETE /api/blog/:id
 router.delete("/:id", blogController.deleteBlogPost);

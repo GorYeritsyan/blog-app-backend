@@ -17,7 +17,10 @@ export const __dirname = path.dirname(__filename);
 const PORT = process.env.PORT || 8080;
 
 const app = express();
+
+// Parse req.body
 app.use(express.json());
+app.use(express.urlencoded());
 app.use(cors());
 
 app.get("/", (req, res) => {
