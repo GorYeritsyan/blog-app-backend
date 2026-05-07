@@ -5,7 +5,7 @@ import cors from "cors";
 import { fileURLToPath } from "url";
 
 // Import Routes
-import blogRouter from "./routes/blog.js";
+import blogRouter from "./routes/blog.ts";
 
 // For .env.* files (process.env.ENV_VARIABLES)
 dotenv.config();

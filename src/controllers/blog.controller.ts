@@ -1,22 +1,25 @@
-import blogService from "../services/blog.service.js";
-import { createBlogPostSchema, updateBlogPostSchema } from "../validations/index.js";
+import type { Request, Response } from "express";
+
+import { createBlogPostSchema, updateBlogPostSchema } from "../validations/index.ts";
+import blogService from "../services/blog.service.ts";
+import type {ApiResponse, TBlogPost, TBlogPostBody, TBlogPostQuery, TPagination} from "../types/types.ts";
 
 class BlogController {
-    async getBlogPosts(req, res) {
-        const { query, page = 1, limit = 10, orderBy = "created_at", order = "asc" } = req.query;
+    async getBlogPosts(req: Request<{}, {}, {}, TBlogPostQuery>, res: Response<ApiResponse<unknown>>) {
+        const { query, page = "1", limit = "10", orderBy = "created_at", order = "asc" } = req.query;
 
         const { data, totalPages } = await blogService.getBlogPosts({ query, limit, page, orderBy, order: order.toUpperCase() });
 
         // Pagination
-        const pagination = { totalPages, hasNext: +page < totalPages, hasPrev: +page > 1, currentPage: +page };
+        const pagination: TPagination = { currentPage: +page, totalPages, hasNext: +page < totalPages, hasPrev: +page > 1 };
 
         res.json({ success: true, pagination, data });
     }
 
-    async getBlogPostById(req, res) {
+    async getBlogPostById(req: Request<{ id: string }>, res: Response<ApiResponse<TBlogPost>>) {
         const { id } = req.params;
 
-        const blogPost = await blogService.getBlogPostById(id);
+        const blogPost = await blogService.getBlogPostById(+id);
 
         if (!blogPost) {
             res.json({ success: false, message: `Blog Post by ID ${id} not found` })
@@ -26,7 +29,7 @@ class BlogController {
         res.json({ success: true, data: blogPost });
     }
 
-    async createBlogPost(req, res) {
+    async createBlogPost(req: Request<{}, {}, TBlogPostBody>, res: Response<ApiResponse<TBlogPost>>) {
         try {
             // Validate request body
             const validBody = await createBlogPostSchema.validateAsync(req.body);
@@ -39,12 +42,12 @@ class BlogController {
         }
     }
 
-    async updateBlogPost(req, res) {
+    async updateBlogPost(req: Request<{ id: string }>, res: Response<ApiResponse<TBlogPost>>) {
         const { id } = req.params;
 
         // Create query strings from these arrays later on for update request
-        const updateQueryArray = [];
-        const updateQueryValues = [];
+        const updateQueryArray: string[] = [];
+        const updateQueryValues: string[] = [];
 
         try {
             // Validate request body
@@ -59,7 +62,7 @@ class BlogController {
             });
 
             // Get blog post by ID
-            const blogPost = await blogService.getBlogPostById(id);
+            const blogPost = await blogService.getBlogPostById(+id);
 
             // Handle Not found case
             if (!blogPost) {
@@ -79,10 +82,10 @@ class BlogController {
         }
     }
 
-    async deleteBlogPost(req, res) {
+    async deleteBlogPost(req: Request<{ id: string }>, res: Response<ApiResponse<TBlogPost>>) {
         const { id } = req.params;
 
-        const deletedBlogPost = await blogService.deleteBlogPost(id);
+        const deletedBlogPost = await blogService.deleteBlogPost(+id);
 
         res.json({ success: true, data: deletedBlogPost });
     }
