@@ -2,8 +2,7 @@ import db from "../db/index.js";
 import type { TBlogPost, TBlogPostBody, TBlogPostQuery, TUpdateBlogPostProps } from "../types/types.js";
 
 class BlogService {
-    // TODO: Change to private function after typescript setup
-    #generateFilterQuery(query: string, values?: (string | number)[]) {
+    private generateFilterQuery(query: string, values?: (string | number)[]) {
         const newValues = values ? [...values] : [];
         let filterQuery = "";
 
@@ -24,7 +23,7 @@ class BlogService {
 
         // TODO: Check if there is any alternative way to implement sorting logic
         // Whitelist for orderBy and order list to prevent SQL Injection
-        const allowedColumns = ["id", "title", "content", "author", "created_at"];
+        const allowedColumns = ["title", "content", "author", "created_at"];
         const allowedOrders = ["ASC", "DESC"];
 
         // Safe to use inside query, safe from SQL Injection
@@ -32,8 +31,8 @@ class BlogService {
         const safeOrder = typeof order !== "undefined" && allowedOrders.includes(order) ? order : "ASC";
 
         // Query values and queryString with or without filter logic
-        const { values, filterQuery } = this.#generateFilterQuery(query, paginationValues);
-        const { values: countValues, filterQuery: countFilterQuery } = this.#generateFilterQuery(query);
+        const { values, filterQuery } = this.generateFilterQuery(query, paginationValues);
+        const { values: countValues, filterQuery: countFilterQuery } = this.generateFilterQuery(query);
 
         // Get paginated data
         const { rows } = await db.query(`SELECT * FROM blog ${filterQuery} ORDER BY ${safeOrderBy} ${safeOrder} LIMIT $1 OFFSET $2`, values);
