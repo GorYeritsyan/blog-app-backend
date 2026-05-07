@@ -26,6 +26,10 @@ app.use(cors());
 // Routes
 app.use("/api/blog", blogRouter);
 
+app.use((req, res) => {
+    res.status(404).json({ success: false, message: "Route not found"})
+})
+
 app.listen(PORT, () => {
     console.log(`Listening on port ${PORT}`);
 });

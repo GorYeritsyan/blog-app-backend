@@ -1,14 +1,16 @@
 import blogService from "../services/blog.service.js";
 import { createBlogPostSchema, updateBlogPostSchema } from "../validations/index.js";
 
-// TODO: Change fs logic to PostgreSQL queries
-// TODO: Add services layer for business logic
-// TODO: Add model layer for PostgreSQL
-
 class BlogController {
     async getBlogPosts(req, res) {
-        const blogPosts = await blogService.getBlogPosts({ limit: 10, offset: 10 });
-        res.json({ success: true, data: blogPosts });
+        const { query, page = 1, limit = 10, orderBy = "created_at", order = "asc" } = req.query;
+
+        const { data, totalPages } = await blogService.getBlogPosts({ query, limit, page, orderBy, order: order.toUpperCase() });
+
+        // Pagination
+        const pagination = { totalPages, hasNext: +page < totalPages, hasPrev: +page > 1, currentPage: +page };
+
+        res.json({ success: true, pagination, data });
     }
 
     async getBlogPostById(req, res) {
@@ -17,7 +19,7 @@ class BlogController {
         const blogPost = await blogService.getBlogPostById(id);
 
         if (!blogPost) {
-            res.json({ error: `Blog Post by ID ${id} not found` })
+            res.json({ success: false, message: `Blog Post by ID ${id} not found` })
             return;
         }
 
@@ -41,8 +43,8 @@ class BlogController {
         const { id } = req.params;
 
         // Create query strings from these arrays later on for update request
-        const queryUpdates = [];
-        const queryValues = [];
+        const updateQueryArray = [];
+        const updateQueryValues = [];
 
         try {
             // Validate request body
@@ -50,10 +52,10 @@ class BlogController {
 
             // Fill query arrays
             Object.entries(validBody).forEach(([key, value]) => {
-                queryValues.push(value);
+                updateQueryValues.push(value);
 
                 // title = $1, content = $2, etc...
-                queryUpdates.push(`${key} = $${queryValues.length}`);
+                updateQueryArray.push(`${key} = $${updateQueryValues.length}`);
             });
 
             // Get blog post by ID
@@ -67,7 +69,7 @@ class BlogController {
 
             // Update blog post by id
             try {
-                const updatedBlogPost = await blogService.updateBlogPost({ id, updateQueryString: queryUpdates.join(", "), values: queryValues });
+                const updatedBlogPost = await blogService.updateBlogPost({ id, updateQueryString: updateQueryArray.join(", "), values: updateQueryValues });
                 res.status(200).json({ success: true, data: updatedBlogPost });
             } catch (err) {
                 res.status(500).json({ success: false, message: `Something went wrong when updating blog post by ID ${id}` });
