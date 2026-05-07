@@ -1,22 +1,24 @@
-import db from "../db/index.ts";
-import type {TBlogPost, TBlogPostBody, TBlogPostQuery} from "../types/types.ts";
+import db from "../db/index.js";
+import type { TBlogPost, TBlogPostBody, TBlogPostQuery, TUpdateBlogPostProps } from "../types/types.js";
 
 class BlogService {
     // TODO: Change to private function after typescript setup
-    #generateFilterQuery(query?: string, values?: (string | number)[]) {
+    #generateFilterQuery(query: string, values?: (string | number)[]) {
         const newValues = values ? [...values] : [];
         let filterQuery = "";
 
-        if (query) {
+        if (query.trim()) {
             newValues.push(`%${query}%`);
+
+            // Filter SQL query
             filterQuery = `WHERE title ILIKE $${newValues.length} OR content ILIKE $${newValues.length}`;
         }
 
         return { values: newValues, filterQuery };
     }
 
-    // Get all blog posts
-    async getBlogPosts({ query, limit = "10", page = "1", orderBy, order }: TBlogPostQuery): Promise<{ data: TBlogPost[]; totalPages: number }> {
+    // Get all blog posts service
+    async getBlogPosts({ query, limit, page, orderBy, order }: Required<TBlogPostQuery>): Promise<{ data: TBlogPost[]; totalPages: number }> {
         const offset = (+page - 1) * +limit;
         const paginationValues = [limit, offset];
 
@@ -42,26 +44,26 @@ class BlogService {
         return { data: rows, totalPages: Math.ceil(total[0].count / +limit) };
     }
 
-    // Get blog post by id
+    // Get blog post by id service
     async getBlogPostById(id: number): Promise<TBlogPost> {
         const { rows } = await db.query("SELECT * FROM blog WHERE id = $1", [id]);
         return rows[0];
     }
 
-    // Create new blog post
-    async createBlogPost({ title, content, author }): Promise<TBlogPost> {
+    // Create new blog post service
+    async createBlogPost({ title, content, author }: TBlogPostBody): Promise<TBlogPost> {
         const { rows } = await db.query("INSERT INTO blog (title, content, author) VALUES ($1, $2, $3) RETURNING *", [title, content, author]);
         return rows[0];
     }
 
     // TODO: Check if this query safe from SQL Injection
-    // Update blog post by ID
-    async updateBlogPost({ id, updateQueryString, values }): Promise<TBlogPost> {
+    // Update blog post by ID service
+    async updateBlogPost({ id, updateQueryString, values }: TUpdateBlogPostProps): Promise<TBlogPost> {
         const { rows } = await db.query(`UPDATE blog SET ${updateQueryString} WHERE id = ${id} RETURNING *`, values);
         return rows[0];
     }
 
-    // Delete blog post by ID
+    // Delete blog post by ID service
     async deleteBlogPost(id: number): Promise<TBlogPost> {
         const { rows } = await db.query("DELETE FROM blog WHERE id = $1 RETURNING *", [id]);
         return rows[0];

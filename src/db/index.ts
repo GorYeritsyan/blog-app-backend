@@ -1,5 +1,5 @@
 import { Pool } from "pg";
-import { DB_PASSWORD, DB_PORT, DB_USER } from "../config/env.ts";
+import { DB_PASSWORD, DB_PORT, DB_USER } from "../config/env.js";
 
 const db = new Pool({
     host: "localhost",

@@ -5,7 +5,7 @@ import cors from "cors";
 import { fileURLToPath } from "url";
 
 // Import Routes
-import blogRouter from "./routes/blog.ts";
+import blogRouter from "./routes/blog.js";
 
 // For .env.* files (process.env.ENV_VARIABLES)
 dotenv.config();
@@ -26,9 +26,7 @@ app.use(cors());
 // Routes
 app.use("/api/blog", blogRouter);
 
-app.use((req, res) => {
-    res.status(404).json({ success: false, message: "Route not found"})
-})
+// TODO: Add global Error handler
 
 app.listen(PORT, () => {
     console.log(`Listening on port ${PORT}`);

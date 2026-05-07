@@ -1,12 +1,13 @@
 import type { Request, Response } from "express";
 
-import { createBlogPostSchema, updateBlogPostSchema } from "../validations/index.ts";
-import blogService from "../services/blog.service.ts";
-import type {ApiResponse, TBlogPost, TBlogPostBody, TBlogPostQuery, TPagination} from "../types/types.ts";
+import { createBlogPostSchema, updateBlogPostSchema } from "../validations/index.js";
+import blogService from "../services/blog.service.js";
+import type { ApiResponse, TBlogPost, TBlogPostBody, TBlogPostQuery, TPagination } from "../types/types.js";
 
 class BlogController {
-    async getBlogPosts(req: Request<{}, {}, {}, TBlogPostQuery>, res: Response<ApiResponse<unknown>>) {
-        const { query, page = "1", limit = "10", orderBy = "created_at", order = "asc" } = req.query;
+    // Get all paginated blog posts controller
+    async getBlogPosts(req: Request<{}, {}, {}, TBlogPostQuery>, res: Response<ApiResponse<TBlogPost[]>>) {
+        const { query = "", page = "1", limit = "10", orderBy = "created_at", order = "asc" } = req.query;
 
         const { data, totalPages } = await blogService.getBlogPosts({ query, limit, page, orderBy, order: order.toUpperCase() });
 
@@ -16,6 +17,7 @@ class BlogController {
         res.json({ success: true, pagination, data });
     }
 
+    // Get blog post by id controller
     async getBlogPostById(req: Request<{ id: string }>, res: Response<ApiResponse<TBlogPost>>) {
         const { id } = req.params;
 
@@ -29,6 +31,7 @@ class BlogController {
         res.json({ success: true, data: blogPost });
     }
 
+    // Create new blog post controller
     async createBlogPost(req: Request<{}, {}, TBlogPostBody>, res: Response<ApiResponse<TBlogPost>>) {
         try {
             // Validate request body
@@ -37,11 +40,12 @@ class BlogController {
             const newBlogPost = await blogService.createBlogPost(validBody);
 
             res.json({ success: true, data: newBlogPost });
-        } catch (err) {
+        } catch (err: any) {
             res.json({ success: false, message: err.message });
         }
     }
 
+    // Update blog post controller
     async updateBlogPost(req: Request<{ id: string }>, res: Response<ApiResponse<TBlogPost>>) {
         const { id } = req.params;
 
@@ -72,16 +76,17 @@ class BlogController {
 
             // Update blog post by id
             try {
-                const updatedBlogPost = await blogService.updateBlogPost({ id, updateQueryString: updateQueryArray.join(", "), values: updateQueryValues });
+                const updatedBlogPost = await blogService.updateBlogPost({ id: +id, updateQueryString: updateQueryArray.join(", "), values: updateQueryValues });
                 res.status(200).json({ success: true, data: updatedBlogPost });
             } catch (err) {
                 res.status(500).json({ success: false, message: `Something went wrong when updating blog post by ID ${id}` });
             }
-        } catch (err) {
+        } catch (err: any) {
             res.json({ success: false, message: err.message });
         }
     }
 
+    // Delete blog post controller
     async deleteBlogPost(req: Request<{ id: string }>, res: Response<ApiResponse<TBlogPost>>) {
         const { id } = req.params;
 

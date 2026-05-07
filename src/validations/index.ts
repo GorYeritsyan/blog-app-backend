@@ -1,5 +1,5 @@
 import joi from 'joi';
-import type {TBlogPostBody} from "../types/types.ts";
+import type { TBlogPostBody } from "../types/types.js";
 
 export const createBlogPostSchema = joi.object<TBlogPostBody>({
     title: joi.string().max(255).required(),
@@ -7,7 +7,7 @@ export const createBlogPostSchema = joi.object<TBlogPostBody>({
     author: joi.string().max(100).required(),
 });
 
-export const updateBlogPostSchema = joi.object({
+export const updateBlogPostSchema = joi.object<Partial<TBlogPostBody>>({
     title: joi.string().max(255),
     content: joi.string().max(255),
     author: joi.string().max(100),

@@ -1,3 +1,4 @@
+// Blog post query params type
 export type TBlogPostQuery = {
     query?: string;
     page?: string;
@@ -6,6 +7,7 @@ export type TBlogPostQuery = {
     order?: string
 };
 
+// Blog post body type
 export type TBlogPostBody = {
     title: string;
     content: string;
@@ -13,13 +15,9 @@ export type TBlogPostBody = {
 }
 
 // API Response type
-export type ApiResponse<T> = {
-    success: boolean;
-    data?: T;
-    pagination?: TPagination;
-    message?: string;
-}
+export type ApiResponse<T> = { success: boolean; data: T; pagination?: TPagination } | { success: boolean; message: string };
 
+// Pagination type
 export type TPagination = {
     currentPage: number;
     totalPages: number;
@@ -27,6 +25,7 @@ export type TPagination = {
     hasPrev: boolean;
 }
 
+// Blog post type
 export type TBlogPost = {
     id: number;
     title: string;
@@ -35,8 +34,9 @@ export type TBlogPost = {
     created_at: string;
 }
 
+// Update blog post service props type
 export type TUpdateBlogPostProps = {
     id: number;
     updateQueryString: string;
-    values: string[]
+    values: string[];
 }
