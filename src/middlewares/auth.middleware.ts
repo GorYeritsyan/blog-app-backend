@@ -3,7 +3,7 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import { ACCESS_TOKEN_SECRET } from "../config/env.js";
 
 interface RequestWithUser extends Request {
-    user: {
+    user?: {
         userId: number;
     }
 }
@@ -20,7 +20,7 @@ const auth = async (req: RequestWithUser, res: Response, next: NextFunction) => 
     }
 
     try {
-        const decoded = jwt.verify(token, ACCESS_TOKEN_SECRET as string) as JwtPayload;
+        const decoded = jwt.verify(token, ACCESS_TOKEN_SECRET!) as JwtPayload;
         req.user = { userId: decoded.userId };
         next();
     } catch (err) {

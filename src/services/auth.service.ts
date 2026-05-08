@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { LoginBody, RegisterBody, User } from "../types/types.js";
 import db from "../db/index.js";
-import {ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET} from "../config/env.js";
+import { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET } from "../config/env.js";
 import { prisma } from "../lib/prisma.js";
 
 class AuthService {

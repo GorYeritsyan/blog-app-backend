@@ -2,8 +2,13 @@ import type { Request, Response } from "express";
 import authService from "../services/auth.service.js"
 import { loginSchema, registerSchema } from "../validations/index.js";
 import { LoginBody, RegisterBody } from "../types/types.js";
+import {prisma} from "../lib/prisma.js";
 
 class AuthController {
+    async getMe(req, res) {
+        console.log("get me controller");
+    }
+
     async login(req: Request<{}, {}, LoginBody>, res: Response) {
         try {
             const validLoginBody = await loginSchema.validateAsync(req.body);
