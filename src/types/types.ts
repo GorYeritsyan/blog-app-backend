@@ -40,3 +40,23 @@ export type TUpdateBlogPostProps = {
     updateQueryString: string;
     values: string[];
 }
+
+// login type
+export type LoginBody = {
+    email: string;
+    password: string;
+}
+
+export type RegisterBody = {
+    name: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
+}
+
+export type User = {
+    id: number;
+    name: string;
+    email: string;
+    password: string;
+}

@@ -3,9 +3,11 @@ import dotenv from "dotenv";
 import path from "path";
 import cors from "cors";
 import { fileURLToPath } from "url";
+import cookieParser from "cookie-parser";
 
 // Import Routes
 import blogRouter from "./routes/blog.js";
+import authRouter from "./routes/auth.js";
 
 // For .env.* files (process.env.ENV_VARIABLES)
 dotenv.config();
@@ -22,9 +24,11 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(cors());
+app.use(cookieParser());
 
 // Routes
 app.use("/api/blog", blogRouter);
+app.use("/auth", authRouter);
 
 // TODO: Add global Error handler
 
