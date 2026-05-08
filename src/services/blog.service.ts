@@ -1,5 +1,6 @@
 import db from "../db/index.js";
 import type { TBlogPost, TBlogPostBody, TBlogPostQuery, TUpdateBlogPostProps } from "../types/types.js";
+import {prisma} from "../lib/prisma.js";
 
 class BlogService {
     private generateFilterQuery(query: string, values?: (string | number)[]) {
@@ -45,6 +46,7 @@ class BlogService {
 
     // Get blog post by id service
     async getBlogPostById(id: number): Promise<TBlogPost> {
+        // return await prisma.post.findUnique({ where: { id } });
         const { rows } = await db.query("SELECT * FROM blog WHERE id = $1", [id]);
         return rows[0];
     }

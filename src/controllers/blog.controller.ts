@@ -3,18 +3,26 @@ import type { Request, Response } from "express";
 import { createBlogPostSchema, updateBlogPostSchema } from "../validations/index.js";
 import blogService from "../services/blog.service.js";
 import type { ApiResponse, TBlogPost, TBlogPostBody, TBlogPostQuery, TPagination } from "../types/types.js";
+import {prisma} from "../lib/prisma.js";
+
 
 class BlogController {
     // Get all paginated blog posts controller
     async getBlogPosts(req: Request<{}, {}, {}, TBlogPostQuery>, res: Response<ApiResponse<TBlogPost[]>>) {
-        const { query = "", page = "1", limit = "10", orderBy = "created_at", order = "asc" } = req.query;
 
-        const { data, totalPages } = await blogService.getBlogPosts({ query, limit, page, orderBy, order: order.toUpperCase() });
+// Find all users with their posts
+        const users = await prisma.user.findMany();
 
-        // Pagination
-        const pagination: TPagination = { currentPage: +page, totalPages, hasNext: +page < totalPages, hasPrev: +page > 1 };
-
-        res.json({ success: true, pagination, data });
+        console.log("users", users);
+        // const { query = "", page = "1", limit = "10", orderBy = "created_at", order = "asc" } = req.query;
+        //
+        // const { data, totalPages } = await blogService.getBlogPosts({ query, limit, page, orderBy, order: order.toUpperCase() });
+        //
+        // // Pagination
+        // const pagination: TPagination = { currentPage: +page, totalPages, hasNext: +page < totalPages, hasPrev: +page > 1 };
+        //
+        // res.json({ success: true, pagination, data });
+        res.json({ success: true })
     }
 
     // Get blog post by id controller
