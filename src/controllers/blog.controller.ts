@@ -26,7 +26,7 @@ class BlogController {
     async getBlogPostById(req: Request<{ id: string }>, res: Response<ApiResponse<TBlogPost>>) {
         const { id } = req.params;
 
-        const blogPost = await blogService.getBlogPostById(+id, +req.userId);
+        const blogPost = await blogService.getBlogPostById(+id);
 
         if (!blogPost) {
             res.json({ success: false, message: `Blog Post by ID ${id} not found` })
@@ -59,7 +59,7 @@ class BlogController {
             const validBody = await updateBlogPostSchema.validateAsync(req.body);
 
             // Get blog post by ID
-            const blogPost = await blogService.getBlogPostById(+id, req.userId);
+            const blogPost = await blogService.getBlogPostById(+id);
 
             // Handle Not found case
             if (!blogPost) {
@@ -69,7 +69,7 @@ class BlogController {
 
             // Update blog post by id
             try {
-                const updatedBlogPost = await blogService.updateBlogPost({ authorId: req.userId, postId: +id, data: validBody });
+                const updatedBlogPost = await blogService.updateBlogPost({ id: +id, data: validBody });
                 res.status(200).json({ success: true, data: updatedBlogPost });
             } catch (err) {
                 res.status(500).json({ success: false, message: `Something went wrong when updating blog post by ID ${id}` });
@@ -85,7 +85,7 @@ class BlogController {
 
         const deletedBlogPost = await blogService.deleteBlogPost(+id);
 
-        res.json({ success: true, data: deletedBlogPost });
+        res.json({ success: true, message: `Blog post by ID ${id} successfully deleted`, data: deletedBlogPost });
     }
 }
 

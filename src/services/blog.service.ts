@@ -62,8 +62,8 @@ class BlogService {
     }
 
     // Get blog post by id service
-    async getBlogPostById(postId: number, authorId: number): Promise<TBlogPost> {
-        return await prisma.post.findFirst({ where: { id: postId, authorId } });
+    async getBlogPostById(id: number): Promise<TBlogPost> {
+        return await prisma.post.findUnique({ where: { id } });
         // const { rows } = await db.query("SELECT * FROM blog WHERE id = $1", [id]);
         // return rows[0];
     }
@@ -81,11 +81,10 @@ class BlogService {
 
     // TODO: Check if this query safe from SQL Injection
     // Update blog post by ID service
-    async updateBlogPost({ authorId, postId, data }: TUpdateBlogPostProps): Promise<TBlogPost> {
+    async updateBlogPost({ id, data }: TUpdateBlogPostProps): Promise<TBlogPost> {
         return prisma.post.update({
             where: {
-                authorId,
-                id: postId
+                id
             },
             data
         });
@@ -93,8 +92,9 @@ class BlogService {
 
     // Delete blog post by ID service
     async deleteBlogPost(id: number): Promise<TBlogPost> {
-        const { rows } = await db.query("DELETE FROM blog WHERE id = $1 RETURNING *", [id]);
-        return rows[0];
+        return prisma.post.delete({
+            where: { id }
+        });
     }
 }
 
