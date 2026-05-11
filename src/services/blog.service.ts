@@ -18,30 +18,47 @@ class BlogService {
     }
 
     // Get all blog posts service
-    async getBlogPosts({ query, limit, page, orderBy, order }: Required<TBlogPostQuery>): Promise<{ data: TBlogPost[]; totalPages: number }> {
-        const offset = (+page - 1) * +limit;
-        const paginationValues = [limit, offset];
+    async getBlogPosts({ query, limit, page, orderBy, order, authorId }: Required<TBlogPostQuery> & { authorId: number }): Promise<{ data: TBlogPost[]; totalPages: number }> {
+        const skip = (+page - 1) * +limit;
 
-        // TODO: Check if there is any alternative way to implement sorting logic
-        // Whitelist for orderBy and order list to prevent SQL Injection
-        const allowedColumns = ["title", "content", "author", "created_at"];
-        const allowedOrders = ["ASC", "DESC"];
+       const allBlogPosts = await prisma.post.findMany({
+            where: {
+                authorId,
+                ...(query && {
+                    OR: [
+                        { title: { contains: query, mode: "insensitive" } },
+                        { content: { contains: query, mode: "insensitive" } },
+                    ]
+                }),
+            },
 
-        // Safe to use inside query, safe from SQL Injection
-        const safeOrderBy = typeof orderBy !== "undefined" && allowedColumns.includes(orderBy) ? orderBy : "created_at";
-        const safeOrder = typeof order !== "undefined" && allowedOrders.includes(order) ? order : "ASC";
+            // Sort logic - { title: "asc" } || { content: "desc" } || etc...
+            // Default - { createdAt: "asc" }
+            orderBy: {
+                [orderBy]: order
+            },
 
-        // Query values and queryString with or without filter logic
-        const { values, filterQuery } = this.generateFilterQuery(query, paginationValues);
-        const { values: countValues, filterQuery: countFilterQuery } = this.generateFilterQuery(query);
+            // Pagination
+            take: +limit,
+            skip,
+        });
 
-        // Get paginated data
-        const { rows } = await db.query(`SELECT * FROM blog ${filterQuery} ORDER BY ${safeOrderBy} ${safeOrder} LIMIT $1 OFFSET $2`, values);
+       // Total blog posts
+       const totalBlogPosts = await prisma.post.count({
+           where: {
+               authorId,
+               ...(query && {
+                   OR: [
+                       { title: { contains: query, mode: "insensitive" } },
+                       { content: { contains: query, mode: "insensitive" } },
+                   ]
+               }),
+           },
+       });
 
-        // Get total results
-        const { rows: total } = await db.query(`SELECT COUNT(*) FROM blog ${countFilterQuery}`, countValues);
+       const totalPages = totalBlogPosts > 0 ? Math.ceil(totalBlogPosts / +limit) : 1;
 
-        return { data: rows, totalPages: Math.ceil(total[0].count / +limit) };
+       return { data: allBlogPosts, totalPages };
     }
 
     // Get blog post by id service

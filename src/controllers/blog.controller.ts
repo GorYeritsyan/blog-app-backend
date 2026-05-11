@@ -9,18 +9,17 @@ import {prisma} from "../lib/prisma.js";
 class BlogController {
     // Get all paginated blog posts controller
     async getBlogPosts(req: Request<{}, {}, {}, TBlogPostQuery>, res: Response<ApiResponse<TBlogPost[]>>) {
-
         // Find all users with their posts
         const posts = await prisma.post.findMany();
 
-        const { query = "", page = "1", limit = "10", orderBy = "created_at", order = "asc" } = req.query;
+        const { query = "", page = "1", limit = "10", orderBy = "createdAt", order = "asc" } = req.query;
 
-        // const { data, totalPages } = await blogService.getBlogPosts({ query, limit, page, orderBy, order: order.toUpperCase() });
+        const { data, totalPages } = await blogService.getBlogPosts({ query, limit, page, orderBy, order });
 
         // Pagination
-        // const pagination: TPagination = { currentPage: +page, totalPages, hasNext: +page < totalPages, hasPrev: +page > 1 };
+        const pagination: TPagination = { currentPage: +page, totalPages, hasNext: +page < totalPages, hasPrev: +page > 1 };
 
-        res.json({ success: true, data: posts });
+        res.json({ success: true, pagination, data });
     }
 
     // Get blog post by id controller

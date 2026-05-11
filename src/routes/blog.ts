@@ -5,18 +5,18 @@ import auth from "../middlewares/auth.middleware.js";
 const router = Router();
 
 // Get All blog posts - GET /api/blog
-router.get("/", blogController.getBlogPosts);
+router.get("/", auth, blogController.getBlogPosts);
 
 // Get blog post by id - GET /api/blog/:id
-router.get("/:id", blogController.getBlogPostById);
+router.get("/:id", auth, blogController.getBlogPostById);
 
 // Create new blog post - POST /api/blog
-router.post("/", blogController.createBlogPost);
+router.post("/", auth, blogController.createBlogPost);
 
 // Update blog post - PATCH /api/blog/:id
-router.patch("/:id", blogController.updateBlogPost);
+router.patch("/:id", auth, blogController.updateBlogPost);
 
 // Delete blog post - DELETE /api/blog/:id
-router.delete("/:id", blogController.deleteBlogPost);
+router.delete("/:id", auth, blogController.deleteBlogPost);
 
 export default router;

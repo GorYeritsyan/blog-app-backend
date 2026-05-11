@@ -2,11 +2,11 @@ import type { Request, Response } from "express";
 import authService from "../services/auth.service.js"
 import { loginSchema, registerSchema } from "../validations/index.js";
 import { LoginBody, RegisterBody } from "../types/types.js";
-import {prisma} from "../lib/prisma.js";
 
 class AuthController {
-    async getMe(req, res) {
-        console.log("get me controller");
+    async getMe(req: Request, res: Response) {
+        const user = await authService.getMe(req.userId);
+        res.json({ success: true, user: user });
     }
 
     async login(req: Request<{}, {}, LoginBody>, res: Response) {
@@ -17,7 +17,7 @@ class AuthController {
             // Set refresh token in the cookies
             res.cookie("refreshToken", refreshToken, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
 
-            // Send access token
+            // Send access token to client
             res.json({ success: true, message: "You have successfully logged in.", token: accessToken });
         } catch (err: any) {
             res.json({ status: false, error: err.message });
