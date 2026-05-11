@@ -4,7 +4,6 @@ import type {LoginBody, RegisterBody, TBlogPostBody} from "../types/types.js";
 export const createBlogPostSchema = joi.object<TBlogPostBody>({
     title: joi.string().max(255).required(),
     content: joi.string().max(255).required(),
-    author: joi.string().max(100).required(),
 });
 
 export const updateBlogPostSchema = joi.object<Partial<TBlogPostBody>>({

@@ -11,7 +11,6 @@ export type TBlogPostQuery = {
 export type TBlogPostBody = {
     title: string;
     content: string;
-    author: string;
 }
 
 // API Response type

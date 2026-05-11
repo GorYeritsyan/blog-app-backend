@@ -62,23 +62,33 @@ class BlogService {
     }
 
     // Get blog post by id service
-    async getBlogPostById(id: number): Promise<TBlogPost> {
-        // return await prisma.post.findUnique({ where: { id } });
-        const { rows } = await db.query("SELECT * FROM blog WHERE id = $1", [id]);
-        return rows[0];
+    async getBlogPostById(postId: number, authorId: number): Promise<TBlogPost> {
+        return await prisma.post.findFirst({ where: { id: postId, authorId } });
+        // const { rows } = await db.query("SELECT * FROM blog WHERE id = $1", [id]);
+        // return rows[0];
     }
 
     // Create new blog post service
-    async createBlogPost({ title, content, author }: TBlogPostBody): Promise<TBlogPost> {
-        const { rows } = await db.query("INSERT INTO blog (title, content, author) VALUES ($1, $2, $3) RETURNING *", [title, content, author]);
-        return rows[0];
+    async createBlogPost({ title, content, authorId }: TBlogPostBody): Promise<TBlogPost> {
+        return prisma.post.create({
+            data: {
+                title,
+                content,
+                authorId,
+            }
+        });
     }
 
     // TODO: Check if this query safe from SQL Injection
     // Update blog post by ID service
-    async updateBlogPost({ id, updateQueryString, values }: TUpdateBlogPostProps): Promise<TBlogPost> {
-        const { rows } = await db.query(`UPDATE blog SET ${updateQueryString} WHERE id = ${id} RETURNING *`, values);
-        return rows[0];
+    async updateBlogPost({ authorId, postId, data }: TUpdateBlogPostProps): Promise<TBlogPost> {
+        return prisma.post.update({
+            where: {
+                authorId,
+                id: postId
+            },
+            data
+        });
     }
 
     // Delete blog post by ID service
