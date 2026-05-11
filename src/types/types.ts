@@ -1,3 +1,5 @@
+import type { Request } from "express";
+
 // Blog post query params type
 export type TBlogPostQuery = {
     query?: string;
@@ -14,7 +16,7 @@ export type TBlogPostBody = {
 }
 
 // API Response type
-export type ApiResponse<T> = { success: boolean; data: T; pagination?: TPagination } | { success: boolean; message: string };
+export type ApiResponse<T> = { success: boolean; data: T; message?: string; pagination?: TPagination } | { success: boolean; error: string };
 
 // Pagination type
 export type TPagination = {
@@ -29,8 +31,8 @@ export type TBlogPost = {
     id: number;
     title: string;
     content: string;
-    author: string;
-    created_at: string;
+    authorId: number;
+    createdAt: string;
 }
 
 // Update blog post service props type
@@ -59,3 +61,15 @@ export type User = {
     email: string;
     password: string;
 }
+
+// Typed Request with userId attached
+export type AuthRequest<
+    Params = {},
+    ResBody = {},
+    ReqBody = {},
+    Query = {},
+> = Request<Params, ResBody, ReqBody, Query> & {
+    userId: number;
+}
+
+export type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>

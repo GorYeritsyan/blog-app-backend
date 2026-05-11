@@ -1,10 +1,10 @@
 import type { Request, Response } from "express";
 import authService from "../services/auth.service.js"
 import { loginSchema, registerSchema } from "../validations/index.js";
-import { LoginBody, RegisterBody } from "../types/types.js";
+import {AuthRequest, LoginBody, RegisterBody} from "../types/types.js";
 
 class AuthController {
-    async getMe(req: Request, res: Response) {
+    async getMe(req: AuthRequest, res: Response) {
         const user = await authService.getMe(req.userId);
         res.json({ success: true, user: user });
     }
@@ -36,6 +36,7 @@ class AuthController {
         }
     }
 
+    // TODO: Add logout logic & token service
     async logout() {}
 }
 

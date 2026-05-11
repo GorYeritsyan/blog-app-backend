@@ -1,14 +1,10 @@
-import type { NextFunction, Request, Response } from "express";
+import type { NextFunction, Response, Request } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
 
 import { ACCESS_TOKEN_SECRET } from "../config/env.js";
 
-interface RequestWithUser extends Request {
-    userId?: number;
-}
-
 // Middleware to protect API routes
-const auth = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+const auth = async (req: Request & { userId?: number }, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization || "";
     const token = authHeader.split(" ")[1];
 
