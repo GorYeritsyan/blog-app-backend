@@ -11,7 +11,7 @@ class BlogController {
         const authorId = req.userId;
 
         // Find all users with their posts
-        const { data, totalPages } = await blogService.getBlogPosts({ query, limit, page, orderBy, order, authorId });
+        const { data, totalPages } = await blogService.getBlogPosts({ query, limit, page, orderBy, order, authorId: authorId! });
 
         // Pagination
         const pagination: TPagination = { currentPage: +page, totalPages, hasNext: +page < totalPages, hasPrev: +page > 1 };
@@ -40,7 +40,7 @@ class BlogController {
             const validBody = await createBlogPostSchema.validateAsync(req.body);
             const authorId = req.userId;
 
-            const newBlogPost = await blogService.createBlogPost({ ...validBody, authorId });
+            const newBlogPost = await blogService.createBlogPost({ ...validBody, authorId: authorId! });
 
             res.json({ success: true, data: newBlogPost });
         } catch (err: any) {

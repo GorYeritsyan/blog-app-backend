@@ -47,14 +47,12 @@ class BlogService {
     }
 
     // Get blog post by id service
-    async getBlogPostById(id: number): Promise<TBlogPost> {
-        return await prisma.post.findUnique({ where: { id } });
-        // const { rows } = await db.query("SELECT * FROM blog WHERE id = $1", [id]);
-        // return rows[0];
+    async getBlogPostById(id: number): Promise<TBlogPost | null> {
+        return prisma.post.findUnique({ where: { id } });
     }
 
     // Create new blog post service
-    async createBlogPost({ title, content, authorId }: TBlogPostBody): Promise<TBlogPost> {
+    async createBlogPost({ title, content, authorId }: TBlogPostBody & { authorId: number }): Promise<TBlogPost> {
         return prisma.post.create({
             data: {
                 title,

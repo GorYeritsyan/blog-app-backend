@@ -32,14 +32,13 @@ export type TBlogPost = {
     title: string;
     content: string;
     authorId: number;
-    createdAt: string;
+    createdAt: Date;
 }
 
 // Update blog post service props type
 export type TUpdateBlogPostProps = {
     id: number;
-    updateQueryString: string;
-    values: string[];
+    data: Partial<TBlogPostBody>;
 }
 
 // login type
@@ -69,7 +68,7 @@ export type AuthRequest<
     ReqBody = {},
     Query = {},
 > = Request<Params, ResBody, ReqBody, Query> & {
-    userId: number;
+    userId?: number;
 }
 
 export type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>

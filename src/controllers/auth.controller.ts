@@ -5,7 +5,7 @@ import {AuthRequest, LoginBody, RegisterBody} from "../types/types.js";
 
 class AuthController {
     async getMe(req: AuthRequest, res: Response) {
-        const user = await authService.getMe(req.userId);
+        const user = await authService.getMe(req.userId!);
         res.json({ success: true, user: user });
     }
 
