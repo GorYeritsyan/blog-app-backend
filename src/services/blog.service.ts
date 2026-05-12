@@ -3,12 +3,11 @@ import { prisma } from "../lib/prisma.js";
 
 class BlogService {
     // Get all blog posts service
-    async getBlogPosts({ query, limit, page, orderBy, order, authorId }: Required<BlogPostQuery & { authorId: number }>): Promise<{ data: BlogPost[]; totalPages: number }> {
+    async getBlogPosts({ query, limit, page, orderBy, order }: Required<BlogPostQuery>): Promise<{ data: BlogPost[]; totalPages: number }> {
         const skip = (+page - 1) * +limit;
 
-       const allBlogPosts = await prisma.post.findMany({
+        const allBlogPosts = await prisma.post.findMany({
             where: {
-                authorId,
                 ...(query && {
                     OR: [
                         { title: { contains: query, mode: "insensitive" } },
@@ -29,9 +28,8 @@ class BlogService {
         });
 
        // Total blog posts
-       const totalBlogPosts = await prisma.post.count({
+        const totalBlogPosts = await prisma.post.count({
            where: {
-               authorId,
                ...(query && {
                    OR: [
                        { title: { contains: query, mode: "insensitive" } },

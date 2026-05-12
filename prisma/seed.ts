@@ -49,7 +49,7 @@ async function seedDB() {
             email: "john@test.com",
             password: hashedPassword,
         }
-    })
+    });
 
     // Create posts
     await prisma.post.createMany({

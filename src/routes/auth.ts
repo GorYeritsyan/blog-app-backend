@@ -4,17 +4,19 @@ import auth from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
+// GET /api/auth/me
 router.get("/me", auth, authController.getMe);
 
-// POST /auth/login
+// POST /api/auth/login
 router.post("/login", authController.login);
 
-// POST /auth/register
+// POST /api/auth/register
 router.post("/register", authController.register);
 
+// GET /api/auth/refresh
 router.get("/refresh", authController.refreshToken);
 
-// POST /auth/logout
+// POST /api/auth/logout
 router.post("/logout", authController.logout);
 
 export default router;

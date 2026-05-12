@@ -1,26 +1,25 @@
-import type { Request, Response } from "express";
+import type { Response } from "express";
 
 import { createBlogPostSchema, updateBlogPostSchema } from "../validations/index.js";
 import blogService from "../services/blog.service.js";
-import type { ApiResponse, AuthRequest, TBlogPost, TBlogPostBody, TBlogPostQuery, TPagination } from "../types/types.js";
+import type { ApiResponse, AuthRequest, BlogPost, BlogPostBody, BlogPostQuery, Pagination } from "../types/types.js";
 
 class BlogController {
     // Get all paginated blog posts controller
-    async getBlogPosts(req: AuthRequest<{}, {}, {}, TBlogPostQuery>, res: Response<ApiResponse<TBlogPost[]>>) {
-        const { query = "", page = "1", limit = "10", orderBy = "createdAt", order = "asc" } = req.query;
-        const authorId = req.userId;
+    async getBlogPosts(req: AuthRequest<{}, {}, {}, BlogPostQuery>, res: Response<ApiResponse<BlogPost[]>>) {
+        const { query = "", page = "1", limit = "10", orderBy = "createdAt", order = "desc" } = req.query;
 
         // Find all users with their posts
-        const { data, totalPages } = await blogService.getBlogPosts({ query, limit, page, orderBy, order, authorId: authorId! });
+        const { data, totalPages } = await blogService.getBlogPosts({ query, limit, page, orderBy, order });
 
         // Pagination
-        const pagination: TPagination = { currentPage: +page, totalPages, hasNext: +page < totalPages, hasPrev: +page > 1 };
+        const pagination: Pagination = { currentPage: +page, totalPages, hasNext: +page < totalPages, hasPrev: +page > 1 };
 
         res.json({ success: true, pagination, data });
     }
 
     // Get blog post by id controller
-    async getBlogPostById(req: AuthRequest<{ id: string }>, res: Response<ApiResponse<TBlogPost>>) {
+    async getBlogPostById(req: AuthRequest<{ id: string }>, res: Response<ApiResponse<BlogPost>>) {
         const { id } = req.params;
 
         const blogPost = await blogService.getBlogPostById(+id);
@@ -34,7 +33,7 @@ class BlogController {
     }
 
     // Create new blog post controller
-    async createBlogPost(req: AuthRequest<{}, {}, TBlogPostBody>, res: Response<ApiResponse<TBlogPost>>) {
+    async createBlogPost(req: AuthRequest<{}, {}, BlogPostBody>, res: Response<ApiResponse<BlogPost>>) {
         try {
             // Validate request body
             const validBody = await createBlogPostSchema.validateAsync(req.body);
@@ -49,7 +48,7 @@ class BlogController {
     }
 
     // Update blog post controller
-    async updateBlogPost(req: AuthRequest<{ id: string }>, res: Response<ApiResponse<TBlogPost>>) {
+    async updateBlogPost(req: AuthRequest<{ id: string }>, res: Response<ApiResponse<BlogPost>>) {
         const { id } = req.params;
 
         try {
@@ -78,7 +77,7 @@ class BlogController {
     }
 
     // Delete blog post controller
-    async deleteBlogPost(req: AuthRequest<{ id: string }>, res: Response<ApiResponse<TBlogPost>>) {
+    async deleteBlogPost(req: AuthRequest<{ id: string }>, res: Response<ApiResponse<BlogPost>>) {
         const { id } = req.params;
 
         const deletedBlogPost = await blogService.deleteBlogPost(+id);
