@@ -1,4 +1,5 @@
 import { prisma } from "../src/lib/prisma";
+import bcrypt from "bcryptjs";
 
 const mockData = [
     { title: "Getting Started with React Hooks", content: "React Hooks revolutionized the way we write functional components. In this post, we explore useState, useEffect, and custom hooks with practical examples.", authorId: 1 },
@@ -34,12 +35,19 @@ const mockData = [
 ];
 
 async function seedDB() {
+    // Delete existing data
+    await prisma.user.deleteMany();
     await prisma.post.deleteMany();
+
+    // Hash the mock user password
+    const hashedPassword = await bcrypt.hash("password", 10);
+
+    // Seed db
     await prisma.user.create({
         data: {
             name: "John",
             email: "john@test.com",
-            password: "password",
+            password: hashedPassword,
         }
     })
 

@@ -2,6 +2,8 @@ import type { Request, Response } from "express";
 import authService from "../services/auth.service.js"
 import { loginSchema, registerSchema } from "../validations/index.js";
 import {AuthRequest, LoginBody, RegisterBody} from "../types/types.js";
+import tokenService from "../services/token.service.js";
+import {JwtPayload} from "jsonwebtoken";
 
 class AuthController {
     async getMe(req: AuthRequest, res: Response) {
@@ -36,8 +38,27 @@ class AuthController {
         }
     }
 
+    // Refresh token
+    async refreshToken(req: Request, res: Response) {
+        try {
+            const decoded = tokenService.verifyToken(req.cookies.refreshToken, "refresh") as JwtPayload & { userId: number };
+            const { accessToken, refreshToken } = tokenService.signTokens({ userId: decoded.userId });
+
+            // Set refresh token in the cookie
+            res.cookie("refreshToken", refreshToken, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
+
+            res.status(200).json({ success: true, token: accessToken });
+        } catch (err: any) {
+            res.status(400).json({ status: false, error: "Invalid token" });
+        }
+    }
+
     // TODO: Add logout logic & token service
-    async logout() {}
+    async logout(req: Request, res: Response) {
+        res.clearCookie("refreshToken");
+
+        res.status(200).json({ success: true, message: "You have successfully logged out." });
+    }
 }
 
 export default new AuthController();

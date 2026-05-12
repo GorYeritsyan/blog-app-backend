@@ -12,6 +12,8 @@ router.post("/login", authController.login);
 // POST /auth/register
 router.post("/register", authController.register);
 
+router.get("/refresh", authController.refreshToken);
+
 // POST /auth/logout
 router.post("/logout", authController.logout);
 

@@ -1,9 +1,8 @@
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
 
-import { LoginBody, RegisterBody, User } from "../types/types.js";
-import { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET } from "../config/env.js";
 import { prisma } from "../lib/prisma.js";
+import { LoginBody, RegisterBody, User } from "../types/types.js";
+import tokenService from "./token.service.js";
 
 class AuthService {
     async getMe(userId: number) {
@@ -21,8 +20,7 @@ class AuthService {
         if (!isPasswordMatch) throw new Error("Password is invalid");
 
         // Generate access & refresh tokens
-        const accessToken = jwt.sign({ userId: user.id }, ACCESS_TOKEN_SECRET as string, { expiresIn: "15m" });
-        const refreshToken = jwt.sign({ userId: user.id }, REFRESH_TOKEN_SECRET as string, { expiresIn: "7d" });
+        const { accessToken, refreshToken } = tokenService.signTokens({ userId: user.id })
 
         return { accessToken, refreshToken };
     }

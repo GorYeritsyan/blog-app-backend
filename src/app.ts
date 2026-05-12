@@ -28,10 +28,9 @@ app.use(cookieParser());
 
 // Routes
 app.use("/api/blog", blogRouter);
-app.use("/auth", authRouter);
+app.use("/api/auth", authRouter);
 
 // TODO: Add global Error handler
-
 app.listen(PORT, () => {
     console.log(`Listening on port ${PORT}`);
 });
