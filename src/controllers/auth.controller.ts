@@ -1,9 +1,10 @@
 import type { Request, Response } from "express";
+import { JwtPayload } from "jsonwebtoken";
+
 import authService from "../services/auth.service.js"
 import { loginSchema, registerSchema } from "../validations/index.js";
-import {AuthRequest, LoginBody, RegisterBody} from "../types/types.js";
+import { AuthRequest, LoginBody, RegisterBody } from "../types/types.js";
 import tokenService from "../services/token.service.js";
-import {JwtPayload} from "jsonwebtoken";
 
 class AuthController {
     async getMe(req: AuthRequest, res: Response) {

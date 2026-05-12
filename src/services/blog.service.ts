@@ -1,9 +1,9 @@
-import type { TBlogPost, TBlogPostBody, TBlogPostQuery, TUpdateBlogPostProps } from "../types/types.js";
-import {prisma} from "../lib/prisma.js";
+import type { BlogPost, BlogPostBody, BlogPostQuery, UpdateBlogPostProps } from "../types/types.js";
+import { prisma } from "../lib/prisma.js";
 
 class BlogService {
     // Get all blog posts service
-    async getBlogPosts({ query, limit, page, orderBy, order, authorId }: Required<TBlogPostQuery & { authorId: number }>): Promise<{ data: TBlogPost[]; totalPages: number }> {
+    async getBlogPosts({ query, limit, page, orderBy, order, authorId }: Required<BlogPostQuery & { authorId: number }>): Promise<{ data: BlogPost[]; totalPages: number }> {
         const skip = (+page - 1) * +limit;
 
        const allBlogPosts = await prisma.post.findMany({
@@ -47,12 +47,12 @@ class BlogService {
     }
 
     // Get blog post by id service
-    async getBlogPostById(id: number): Promise<TBlogPost | null> {
+    async getBlogPostById(id: number): Promise<BlogPost | null> {
         return prisma.post.findUnique({ where: { id } });
     }
 
     // Create new blog post service
-    async createBlogPost({ title, content, authorId }: TBlogPostBody & { authorId: number }): Promise<TBlogPost> {
+    async createBlogPost({ title, content, authorId }: BlogPostBody & { authorId: number }): Promise<BlogPost> {
         return prisma.post.create({
             data: {
                 title,
@@ -64,7 +64,7 @@ class BlogService {
 
     // TODO: Check if this query safe from SQL Injection
     // Update blog post by ID service
-    async updateBlogPost({ id, data }: TUpdateBlogPostProps): Promise<TBlogPost> {
+    async updateBlogPost({ id, data }: UpdateBlogPostProps): Promise<BlogPost> {
         return prisma.post.update({
             where: {
                 id
@@ -74,7 +74,7 @@ class BlogService {
     }
 
     // Delete blog post by ID service
-    async deleteBlogPost(id: number): Promise<TBlogPost> {
+    async deleteBlogPost(id: number): Promise<BlogPost> {
         return prisma.post.delete({
             where: { id }
         });

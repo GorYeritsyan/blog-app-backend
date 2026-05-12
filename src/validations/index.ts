@@ -1,12 +1,12 @@
 import joi from 'joi';
-import type { LoginBody, RegisterBody, TBlogPostBody } from "../types/types.js";
+import type { LoginBody, RegisterBody, BlogPostBody } from "../types/types.js";
 
-export const createBlogPostSchema = joi.object<TBlogPostBody>({
+export const createBlogPostSchema = joi.object<BlogPostBody>({
     title: joi.string().min(3).max(255).required(),
     content: joi.string().min(3).max(255).required(),
 });
 
-export const updateBlogPostSchema = joi.object<Partial<TBlogPostBody>>({
+export const updateBlogPostSchema = joi.object<Partial<BlogPostBody>>({
     title: joi.string().min(3).max(255),
     content: joi.string().min(3).max(255),
 });
