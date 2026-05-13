@@ -15,8 +15,21 @@ export type BlogPostBody = {
     content: string;
 }
 
+type Failure = {
+    success: boolean;
+    error: string;
+};
+
+type Success<T> = {
+    success: boolean;
+    pagination?: Pagination;
+    data: T;
+    message?: string;
+    token?: string;
+}
+
 // API Response type
-export type ApiResponse<T> = { success: boolean; data: T; message?: string; pagination?: Pagination } | { success: boolean; error: string };
+export type ApiResponse<T> = Success<T> | Failure;
 
 // Pagination type
 export type Pagination = {

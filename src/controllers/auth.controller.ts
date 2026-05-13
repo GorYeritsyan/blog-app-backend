@@ -33,9 +33,9 @@ class AuthController {
 
             const newUser = await authService.register(validRegisterBody);
 
-            res.status(201).json({ success: true, message: "You have successfully registered", user: newUser });
+            res.status(201).json({ success: true, message: "You have successfully registered", data: newUser });
         } catch(err: any) {
-            res.json({ status: false, error: err.message });
+            res.status(400).json({ status: false, error: err.message });
         }
     }
 

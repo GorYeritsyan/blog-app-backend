@@ -25,6 +25,11 @@ class BlogService {
             // Pagination
             take: +limit,
             skip,
+
+            // Include author details
+            include: {
+                author: true
+            }
         });
 
        // Total blog posts
