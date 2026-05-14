@@ -51,7 +51,7 @@ class BlogService {
 
     // Get blog post by id service
     async getBlogPostById(id: number): Promise<BlogPost | null> {
-        return prisma.post.findUnique({ where: { id } });
+        return prisma.post.findUnique({ where: { id }, include: { author: true } });
     }
 
     // Create new blog post service

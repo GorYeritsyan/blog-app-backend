@@ -5,7 +5,7 @@ import auth from "../middlewares/auth.middleware.js";
 const router = Router();
 
 // Get All blog posts - GET /api/blog
-router.get("/", blogController.getBlogPosts);
+router.get("/", auth, blogController.getBlogPosts);
 
 // Get blog post by id - GET /api/blog/:id
 router.get("/:id", auth, blogController.getBlogPostById);

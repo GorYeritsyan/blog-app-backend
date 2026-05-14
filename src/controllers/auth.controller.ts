@@ -9,7 +9,7 @@ import tokenService from "../services/token.service.js";
 class AuthController {
     async getMe(req: AuthRequest, res: Response) {
         const user = await authService.getMe(req.userId!);
-        res.json({ success: true, user: user });
+        res.json({ success: true, data: user });
     }
 
     async login(req: Request<{}, {}, LoginBody>, res: Response) {
