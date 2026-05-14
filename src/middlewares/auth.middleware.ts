@@ -1,10 +1,11 @@
-import type { NextFunction, Response, Request } from "express";
+import type { NextFunction, Response } from "express";
 import { JwtPayload } from "jsonwebtoken";
 
 import tokenService from "../services/token.service.js";
+import { AuthRequest } from "../types/types.js";
 
 // Middleware to protect API routes
-const auth = async (req: Request & { userId?: number }, res: Response, next: NextFunction) => {
+const auth = async (req: AuthRequest, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization || "";
     const token = authHeader.split(" ")[1];
 
