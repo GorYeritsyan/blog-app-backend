@@ -20,7 +20,7 @@ const auth = async (req: AuthRequest, res: Response, next: NextFunction) => {
         req.userId = decoded.userId;
         next();
     } catch (err) {
-        res.status(400).json({ status: false, error: "Invalid token" });
+        res.status(401).json({ status: false, error: "Invalid token" });
     }
 }
 

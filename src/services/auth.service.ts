@@ -13,16 +13,16 @@ class AuthService {
     async login({ email, password }: LoginBody) {
         // Check if user exists
         const user = await prisma.user.findUnique({ where: { email } });
-        if (!user) throw new Error("Email is invalid");
+        if (!user) throw new Error("Email is incorrect");
 
         // Check if password match
         const isPasswordMatch = await bcrypt.compare(password, user.password);
-        if (!isPasswordMatch) throw new Error("Password is invalid");
+        if (!isPasswordMatch) throw new Error("Password is incorrect");
 
         // Generate access & refresh tokens
         const { accessToken, refreshToken } = tokenService.signTokens({ userId: user.id })
 
-        return { accessToken, refreshToken };
+        return { user, accessToken, refreshToken };
     }
 
     // Register user service

@@ -15,13 +15,13 @@ class AuthController {
     async login(req: Request<{}, {}, LoginBody>, res: Response) {
         try {
             const validLoginBody = await loginSchema.validateAsync(req.body);
-            const { accessToken, refreshToken } = await authService.login(validLoginBody);
+            const { user, accessToken, refreshToken } = await authService.login(validLoginBody);
 
             // Set refresh token in the cookies
             res.cookie("refreshToken", refreshToken, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
 
             // Send access token to client
-            res.json({ success: true, message: "You have successfully logged in.", token: accessToken });
+            res.json({ success: true, message: "You have successfully logged in.", data: { ...user, token: accessToken } });
         } catch (err: any) {
             res.json({ status: false, error: err.message });
         }
