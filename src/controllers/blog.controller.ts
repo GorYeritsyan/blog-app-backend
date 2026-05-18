@@ -41,9 +41,9 @@ class BlogController {
 
             const newBlogPost = await blogService.createBlogPost({ ...validBody, authorId: authorId! });
 
-            res.json({ success: true, data: newBlogPost });
+            res.status(201).json({ success: true, data: newBlogPost });
         } catch (err: any) {
-            res.json({ success: false, error: err.message });
+            res.status(500).json({ success: false, error: err.message });
         }
     }
 

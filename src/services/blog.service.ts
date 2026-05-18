@@ -65,7 +65,6 @@ class BlogService {
         });
     }
 
-    // TODO: Check if this query safe from SQL Injection
     // Update blog post by ID service
     async updateBlogPost({ id, data }: UpdateBlogPostProps): Promise<BlogPost> {
         return prisma.post.update({

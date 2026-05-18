@@ -18,7 +18,7 @@ class AuthController {
             const { user, accessToken, refreshToken } = await authService.login(validLoginBody);
 
             // Set refresh token in the cookies
-            res.cookie("refreshToken", refreshToken, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 });
+            res.cookie("refreshToken", refreshToken, { httpOnly: true, sameSite: "none", maxAge: 7 * 24 * 60 * 60 * 1000 });
 
             // Send access token to client
             res.json({ success: true, message: "You have successfully logged in.", data: { ...user, token: accessToken } });

@@ -22,7 +22,7 @@ class AuthService {
         // Generate access & refresh tokens
         const { accessToken, refreshToken } = tokenService.signTokens({ userId: user.id })
 
-        return { user, accessToken, refreshToken };
+        return { user: { id: user.id, name: user.name, email: user.email }, accessToken, refreshToken };
     }
 
     // Register user service
