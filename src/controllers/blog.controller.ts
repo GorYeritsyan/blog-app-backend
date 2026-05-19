@@ -1,8 +1,10 @@
-import type { Response } from "express";
+import type { NextFunction, Response } from "express";
+import fs from "fs/promises";
 
 import { createBlogPostSchema, updateBlogPostSchema } from "../validations/index.js";
 import blogService from "../services/blog.service.js";
 import type { ApiResponse, AuthRequest, BlogPost, BlogPostBody, BlogPostQuery, Pagination } from "../types/types.js";
+import {BadRequestError} from "../errors/index.js";
 
 class BlogController {
     // Get all paginated blog posts controller
@@ -19,16 +21,13 @@ class BlogController {
     }
 
     // Get blog post by id controller
-    async getBlogPostById(req: AuthRequest<{ id: string }>, res: Response<ApiResponse<BlogPost>>) {
+    async getBlogPostById(req: AuthRequest<{ id: string }>, res: Response<ApiResponse<BlogPost>>, next: NextFunction) {
         const { id } = req.params;
 
+        // Make sure that id is typeof number
+        if (isNaN(+id)) throw new BadRequestError();
+
         const blogPost = await blogService.getBlogPostById(+id);
-
-        if (!blogPost) {
-            res.json({ success: false, error: `Blog Post by ID ${id} not found` })
-            return;
-        }
-
         res.json({ success: true, data: blogPost });
     }
 

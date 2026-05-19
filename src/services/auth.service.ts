@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { prisma } from "../lib/prisma.js";
 import { LoginBody, RegisterBody, User } from "../types/types.js";
 import tokenService from "./token.service.js";
+import { UserDto } from "../dto/user.dto.js";
 
 class AuthService {
     async getMe(userId: number) {
@@ -22,11 +23,12 @@ class AuthService {
         // Generate access & refresh tokens
         const { accessToken, refreshToken } = tokenService.signTokens({ userId: user.id })
 
-        return { user: { id: user.id, name: user.name, email: user.email }, accessToken, refreshToken };
+        return { user: new UserDto(user), accessToken, refreshToken };
     }
 
     // Register user service
-    async register({ name, email, password }: Omit<RegisterBody, "confirmPassword">): Promise<User> {
+    // TODO: Type safety for DTO's
+    async register({ name, email, password }: Omit<RegisterBody, "confirmPassword">): Promise<Omit<User, "password">> {
         const existingUser = await prisma.user.findUnique({ where: { email }});
         if (existingUser) throw new Error("User already exists");
 
@@ -34,7 +36,9 @@ class AuthService {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Create new user
-         return prisma.user.create({ data: { name, email, password: hashedPassword } });
+        const newUser = await prisma.user.create({ data: { name, email, password: hashedPassword } });
+
+         return new UserDto(newUser);
     }
 }
 

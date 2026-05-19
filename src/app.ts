@@ -1,9 +1,10 @@
 import express from "express";
 import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
 import path from "path";
 import cors from "cors";
 import { fileURLToPath } from "url";
-import cookieParser from "cookie-parser";
+import errorMiddleware from "./middlewares/error.middleware.js";
 
 // Import Routes
 import blogRouter from "./routes/blog.js";
@@ -29,6 +30,9 @@ app.use(cookieParser());
 // Routes
 app.use("/api/blog", blogRouter);
 app.use("/api/auth", authRouter);
+
+// Error middleware to handle all errors
+app.use(errorMiddleware);
 
 // TODO: Add global Error handler
 app.listen(PORT, () => {

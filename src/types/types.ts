@@ -45,6 +45,7 @@ export type BlogPost = {
     title: string;
     content: string;
     authorId: number;
+    author?: Omit<User, "password">;
     createdAt: Date;
 }
 

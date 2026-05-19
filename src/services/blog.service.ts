@@ -1,5 +1,7 @@
 import type { BlogPost, BlogPostBody, BlogPostQuery, UpdateBlogPostProps } from "../types/types.js";
 import { prisma } from "../lib/prisma.js";
+import {UserDto} from "../dto/user.dto.js";
+import {NotFoundError} from "../errors/index.js";
 
 class BlogService {
     // Get all blog posts service
@@ -46,12 +48,28 @@ class BlogService {
 
        const totalPages = totalBlogPosts > 0 ? Math.ceil(totalBlogPosts / +limit) : 1;
 
-       return { data: allBlogPosts, totalPages };
+       // Use UserDto for author to not send password
+       const allBlogPostsDto = allBlogPosts.map(post => ({ ...post, author: new UserDto(post.author) }));
+
+       return { data: allBlogPostsDto, totalPages };
     }
 
     // Get blog post by id service
-    async getBlogPostById(id: number): Promise<BlogPost | null> {
-        return prisma.post.findUnique({ where: { id }, include: { author: true } });
+    async getBlogPostById(id: number): Promise<BlogPost> {
+        const blogPost = await prisma.post.findUnique({ where: { id }, include: { author: true } });
+
+        // If there blog post by provided ID not found throw error
+        if (!blogPost) {
+            throw new NotFoundError(`Blog Post by ID ${id} not found`);
+        }
+
+        const blogPostDto: BlogPost = { ...blogPost };
+
+        if (blogPost?.author) {
+            blogPostDto.author = new UserDto(blogPost.author);
+        }
+
+        return blogPostDto;
     }
 
     // Create new blog post service
