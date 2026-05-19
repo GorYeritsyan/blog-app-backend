@@ -59,7 +59,7 @@ class BlogController {
         if (!blogPost) throw new NotFoundError(`Blog Post by ID ${id} not found`);
 
         // Update blog post by id
-        const updatedBlogPost = await blogService.updateBlogPost({ id: +id, data: validBody, authorId });
+        const updatedBlogPost = await blogService.updateBlogPost({ id: +id, data: validBody, authorId: authorId! });
         // TODO: Check if this express catches this error properly
         if (!updatedBlogPost) throw new AppError(`Something went wrong when updating new blog post by ID ${id}`, 500);
 
