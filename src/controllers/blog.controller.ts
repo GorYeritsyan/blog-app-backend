@@ -24,9 +24,6 @@ class BlogController {
     async getBlogPostById(req: AuthRequest<{ id: string }>, res: Response<ApiResponse<BlogPost>>, next: NextFunction) {
         const { id } = req.params;
 
-        // Make sure that id is typeof number
-        if (isNaN(+id)) throw new BadRequestError();
-
         const blogPost = await blogService.getBlogPostById(+id);
         res.json({ success: true, data: blogPost });
     }
