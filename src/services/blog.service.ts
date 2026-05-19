@@ -2,6 +2,7 @@ import type { BlogPost, BlogPostBody, BlogPostQuery, UpdateBlogPostProps } from 
 import { prisma } from "../lib/prisma.js";
 import {UserDto} from "../dto/user.dto.js";
 import {NotFoundError} from "../errors/index.js";
+import {Prisma} from "@prisma/client/extension";
 
 class BlogService {
     // Get all blog posts service
@@ -73,12 +74,23 @@ class BlogService {
     }
 
     // Create new blog post service
-    async createBlogPost({ title, content, authorId }: BlogPostBody & { authorId: number }): Promise<BlogPost> {
+    async createBlogPost({ title, content, tags, authorId }: BlogPostBody & { authorId: number }): Promise<BlogPost> {
+        const createQuery: Prisma.PostCreateInput = {
+            title,
+            content,
+            authorId
+        };
+
+        if (tags && tags.length > 0) {
+            createQuery.tags = {
+                connectOrCreate: tags.map(tag => ({ create: { title: tag }, where: { title: tag } })),
+            }
+        }
+
         return prisma.post.create({
-            data: {
-                title,
-                content,
-                authorId,
+            data: createQuery,
+            include: {
+                tags: true
             }
         });
     }

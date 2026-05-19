@@ -1,10 +1,9 @@
 import type { NextFunction, Response } from "express";
-import fs from "fs/promises";
 
 import { createBlogPostSchema, updateBlogPostSchema } from "../validations/index.js";
 import blogService from "../services/blog.service.js";
 import type { ApiResponse, AuthRequest, BlogPost, BlogPostBody, BlogPostQuery, Pagination } from "../types/types.js";
-import {BadRequestError} from "../errors/index.js";
+import { AppError, BadRequestError, NotFoundError } from "../errors/index.js";
 
 class BlogController {
     // Get all paginated blog posts controller
@@ -30,46 +29,40 @@ class BlogController {
 
     // Create new blog post controller
     async createBlogPost(req: AuthRequest<{}, {}, BlogPostBody>, res: Response<ApiResponse<BlogPost>>) {
-        try {
-            // Validate request body
-            const validBody = await createBlogPostSchema.validateAsync(req.body);
-            const authorId = req.userId;
+        // Validate request body
+        const { error, value: validBody } = createBlogPostSchema.validate(req.body);
+        if (error) throw new BadRequestError("Invalid request body");
 
-            const newBlogPost = await blogService.createBlogPost({ ...validBody, authorId: authorId! });
+        // const validBody = await createBlogPostSchema.validateAsync(req.body);
 
-            res.status(201).json({ success: true, data: newBlogPost });
-        } catch (err: any) {
-            res.status(500).json({ success: false, error: err.message });
-        }
+        const authorId = req.userId;
+
+        const newBlogPost = await blogService.createBlogPost({ ...validBody, authorId: authorId! });
+        if (!newBlogPost) throw new AppError(`Something went wrong when creating new blog post`, 500);
+
+        res.status(201).json({ success: true, data: newBlogPost });
     }
 
     // Update blog post controller
     async updateBlogPost(req: AuthRequest<{ id: string }>, res: Response<ApiResponse<BlogPost>>) {
         const { id } = req.params;
 
-        try {
-            // Validate request body
-            const validBody = await updateBlogPostSchema.validateAsync(req.body);
+        // Validate request body
+        const { error, value: validBody } = updateBlogPostSchema.validate(req.body);
+        if (error) throw new BadRequestError("Invalid request body");
 
-            // Get blog post by ID
-            const blogPost = await blogService.getBlogPostById(+id);
+        // Get blog post by ID
+        const blogPost = await blogService.getBlogPostById(+id);
 
-            // Handle Not found case
-            if (!blogPost) {
-                res.json({ success: false, error: `Blog Post by ID ${id} not found` });
-                return;
-            }
+        // Handle Not found case
+        if (!blogPost) throw new NotFoundError(`Blog Post by ID ${id} not found`);
 
-            // Update blog post by id
-            try {
-                const updatedBlogPost = await blogService.updateBlogPost({ id: +id, data: validBody });
-                res.status(200).json({ success: true, data: updatedBlogPost });
-            } catch (err) {
-                res.status(500).json({ success: false, error: `Something went wrong when updating blog post by ID ${id}` });
-            }
-        } catch (err: any) {
-            res.json({ success: false, error: err.message });
-        }
+        // Update blog post by id
+        const updatedBlogPost = await blogService.updateBlogPost({ id: +id, data: validBody });
+        // TODO: Check if this express catches this error properly
+        if (!updatedBlogPost) throw new AppError(`Something went wrong when updating new blog post by ID ${id}`, 500);
+
+        res.status(200).json({ success: true, data: updatedBlogPost });
     }
 
     // Delete blog post controller

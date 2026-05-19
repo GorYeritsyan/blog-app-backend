@@ -16,9 +16,9 @@ router.get("/:id", auth, validateId, blogController.getBlogPostById);
 router.post("/", auth, blogController.createBlogPost);
 
 // Update blog post - PATCH /api/blog/:id
-router.patch("/:id", auth, blogController.updateBlogPost);
+router.patch("/:id", auth, validateId, blogController.updateBlogPost);
 
 // Delete blog post - DELETE /api/blog/:id
-router.delete("/:id", auth, blogController.deleteBlogPost);
+router.delete("/:id", auth, validateId, blogController.deleteBlogPost);
 
 export default router;

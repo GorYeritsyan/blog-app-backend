@@ -13,6 +13,7 @@ export type BlogPostQuery = {
 export type BlogPostBody = {
     title: string;
     content: string;
+    tags?: string[];
 }
 
 type Failure = {
