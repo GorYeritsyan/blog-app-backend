@@ -2,7 +2,7 @@ import type { BlogPost, BlogPostBody, BlogPostQuery, UpdateBlogPostProps } from 
 import { prisma } from "../lib/prisma.js";
 import {UserDto} from "../dto/user.dto.js";
 import {NotFoundError} from "../errors/index.js";
-import {Prisma} from "@prisma/client/extension";
+import {Prisma} from "../generated/prisma/client.js";
 
 class BlogService {
     // Get all blog posts service
@@ -31,7 +31,8 @@ class BlogService {
 
             // Include author details
             include: {
-                author: true
+                author: true,
+                tags: true,
             }
         });
 
@@ -57,7 +58,10 @@ class BlogService {
 
     // Get blog post by id service
     async getBlogPostById(id: number): Promise<BlogPost> {
-        const blogPost = await prisma.post.findUnique({ where: { id }, include: { author: true } });
+        const blogPost = await prisma.post.findUnique({
+            where: { id },
+            include: { author: true, tags: true }
+        });
 
         // If there blog post by provided ID not found throw error
         if (!blogPost) {
@@ -75,33 +79,68 @@ class BlogService {
 
     // Create new blog post service
     async createBlogPost({ title, content, tags, authorId }: BlogPostBody & { authorId: number }): Promise<BlogPost> {
+        // TODO: Check query, need to use connect or just authorId
         const createQuery: Prisma.PostCreateInput = {
             title,
             content,
-            authorId
+            author: {
+                connect: { id: authorId }
+            }
         };
 
+        // If tags present in request body then attach it in query and create in the db
         if (tags && tags.length > 0) {
             createQuery.tags = {
-                connectOrCreate: tags.map(tag => ({ create: { title: tag }, where: { title: tag } })),
+                connectOrCreate: tags.map(tag => ({
+                    create: { title: tag },
+                    where: { title: tag }
+                })),
             }
         }
 
         return prisma.post.create({
             data: createQuery,
             include: {
-                tags: true
+                author: true,
+                tags: true,
             }
         });
     }
 
     // Update blog post by ID service
-    async updateBlogPost({ id, data }: UpdateBlogPostProps): Promise<BlogPost> {
+    async updateBlogPost({ id, data, authorId }: UpdateBlogPostProps & { authorId: number }): Promise<BlogPost> {
+        const { title, content } = data;
+
+        const updateQuery: Prisma.PostUpdateInput = {
+            title,
+            content,
+            author: {
+                connect: { id: authorId }
+            }
+        };
+
+        // TODO: Check update query logic
+        if (data.tags && data.tags.length > 0) {
+            updateQuery.tags = {
+                set: [],
+                connectOrCreate: data.tags.map(tag => ({
+                    where: { title: tag },
+                    create: { title: tag },
+                }))
+            }
+        }
+
         return prisma.post.update({
             where: {
                 id
             },
-            data
+            data: updateQuery,
+
+            // Include author and tags fields
+            include: {
+                author: true,
+                tags: true,
+            }
         });
     }
 

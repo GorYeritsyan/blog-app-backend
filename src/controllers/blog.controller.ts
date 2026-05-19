@@ -46,6 +46,7 @@ class BlogController {
     // Update blog post controller
     async updateBlogPost(req: AuthRequest<{ id: string }>, res: Response<ApiResponse<BlogPost>>) {
         const { id } = req.params;
+        const authorId = req.userId;
 
         // Validate request body
         const { error, value: validBody } = updateBlogPostSchema.validate(req.body);
@@ -58,7 +59,7 @@ class BlogController {
         if (!blogPost) throw new NotFoundError(`Blog Post by ID ${id} not found`);
 
         // Update blog post by id
-        const updatedBlogPost = await blogService.updateBlogPost({ id: +id, data: validBody });
+        const updatedBlogPost = await blogService.updateBlogPost({ id: +id, data: validBody, authorId });
         // TODO: Check if this express catches this error properly
         if (!updatedBlogPost) throw new AppError(`Something went wrong when updating new blog post by ID ${id}`, 500);
 

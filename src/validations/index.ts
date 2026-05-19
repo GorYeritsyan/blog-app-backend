@@ -10,6 +10,7 @@ export const createBlogPostSchema = joi.object<BlogPostBody>({
 export const updateBlogPostSchema = joi.object<Partial<BlogPostBody>>({
     title: joi.string().min(3).max(255),
     content: joi.string().min(3).max(255),
+    tags: joi.array().items(joi.string()),
 });
 
 // Login schema
