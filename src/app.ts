@@ -9,6 +9,7 @@ import errorMiddleware from "./middlewares/error.middleware.js";
 // Import Routes
 import blogRouter from "./routes/blog.js";
 import authRouter from "./routes/auth.js";
+import usersRouter from "./routes/users.js";
 
 // For .env.* files (process.env.ENV_VARIABLES)
 dotenv.config();
@@ -30,6 +31,7 @@ app.use(cookieParser());
 // Routes
 app.use("/api/blog", blogRouter);
 app.use("/api/auth", authRouter);
+app.use("/api/users", usersRouter);
 
 // Error middleware to handle all errors
 app.use(errorMiddleware);
