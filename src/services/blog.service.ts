@@ -15,7 +15,7 @@ class BlogService {
                     OR: [
                         { title: { contains: query, mode: "insensitive" } },
                         { content: { contains: query, mode: "insensitive" } },
-                    ]
+                    ],
                 }),
             },
 
@@ -60,7 +60,7 @@ class BlogService {
     async getBlogPostById(id: number): Promise<BlogPost> {
         const blogPost = await prisma.post.findUnique({
             where: { id },
-            include: { author: true, tags: true }
+            include: { author: true, tags: true },
         });
 
         // If there blog post by provided ID not found throw error
@@ -84,7 +84,7 @@ class BlogService {
             title,
             content,
             author: {
-                connect: { id: authorId }
+                connect: { id: authorId },
             }
         };
 
@@ -93,7 +93,7 @@ class BlogService {
             createQuery.tags = {
                 connectOrCreate: tags.map(tag => ({
                     create: { title: tag },
-                    where: { title: tag }
+                    where: { title: tag },
                 })),
             }
         }
@@ -115,7 +115,7 @@ class BlogService {
             title,
             content,
             author: {
-                connect: { id: authorId }
+                connect: { id: authorId },
             }
         };
 
@@ -147,7 +147,7 @@ class BlogService {
     // Delete blog post by ID service
     async deleteBlogPost(id: number): Promise<BlogPost> {
         return prisma.post.delete({
-            where: { id }
+            where: { id },
         });
     }
 }

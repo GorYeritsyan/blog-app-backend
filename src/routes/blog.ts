@@ -1,7 +1,6 @@
 import { Router } from "express";
 import blogController from "../controllers/blog.controller.js";
 import auth from "../middlewares/auth.middleware.js";
-import catchAsync from "../utils/catch-async.js";
 import validateId from "../middlewares/validate-id.middleware.js";
 
 const router = Router();
