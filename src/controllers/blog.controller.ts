@@ -3,7 +3,7 @@ import type { NextFunction, Response } from "express";
 import { createBlogPostSchema, updateBlogPostSchema } from "../validations/index.js";
 import blogService from "../services/blog.service.js";
 import type { ApiResponse, AuthRequest, BlogPost, BlogPostBody, BlogPostQuery, Pagination } from "../types/types.js";
-import { AppError, BadRequestError, NotFoundError } from "../errors/index.js";
+import {AppError, BadRequestError, ForbiddenError, NotFoundError} from "../errors/index.js";
 
 class BlogController {
     // Get all paginated blog posts controller
@@ -58,6 +58,9 @@ class BlogController {
         // Handle Not found case
         if (!blogPost) throw new NotFoundError(`Blog Post by ID ${id} not found`);
 
+        // Don't allow users edit other authors posts
+        if (blogPost.authorId !== authorId) throw new ForbiddenError(`You can only edit your own posts`);
+
         // Update blog post by id
         const updatedBlogPost = await blogService.updateBlogPost({ id: +id, data: validBody, authorId: authorId! });
         // TODO: Check if this express catches this error properly
@@ -69,7 +72,18 @@ class BlogController {
     // Delete blog post controller
     async deleteBlogPost(req: AuthRequest<{ id: string }>, res: Response<ApiResponse<BlogPost>>) {
         const { id } = req.params;
+        const authorId = req.userId;
 
+        // Get blog post by ID
+        const blogPost = await blogService.getBlogPostById(+id);
+
+        // Not found error
+        if (!blogPost) throw new NotFoundError(`Blog Post by ID ${id} not found`);
+
+        // Forbidden error to not allow users delete other authors posts
+        if (blogPost.authorId !== authorId) throw new ForbiddenError("You can only delete your own posts");
+
+        // Delete post
         const deletedBlogPost = await blogService.deleteBlogPost(+id);
 
         res.json({ success: true, message: `Blog post by ID ${id} successfully deleted`, data: deletedBlogPost });
