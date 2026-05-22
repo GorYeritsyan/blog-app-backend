@@ -1,4 +1,4 @@
-import type { NextFunction, Response } from "express";
+import type { NextFunction, Response, Request } from "express";
 import { JwtPayload } from "jsonwebtoken";
 
 import tokenService from "../services/token.service.js";

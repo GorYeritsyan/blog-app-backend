@@ -1,4 +1,4 @@
-import type { NextFunction, Response } from "express";
+import type { NextFunction, Response, Request } from "express";
 
 import { createBlogPostSchema, updateBlogPostSchema } from "../validations/index.js";
 import blogService from "../services/blog.service.js";

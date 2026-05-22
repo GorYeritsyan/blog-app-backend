@@ -18,6 +18,11 @@ model User {
   email    String @unique
   password String
   posts    Post[]
+
+  // Requests that sent this user
+  sentFriendRequests     FriendRequest[] @relation("SentRequests")
+  // Requests that received this user
+  receivedFriendRequests FriendRequest[] @relation("ReceivedRequests")
 }
 
 model Post {
@@ -34,4 +39,24 @@ model Tag {
   id    Int    @id @default(autoincrement())
   title String @unique
   posts Post[]
+}
+
+model FriendRequest {
+  id        Int                 @id @default(autoincrement())
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+  status    FriendRequestStatus @default(PENDING)
+
+  sender     User @relation("SentRequests", fields: [senderId], references: [id])
+  senderId   Int
+  receiver   User @relation("ReceivedRequests", fields: [receiverId], references: [id])
+  receiverId Int
+
+  @@unique([senderId, receiverId])
+}
+
+enum FriendRequestStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
 }

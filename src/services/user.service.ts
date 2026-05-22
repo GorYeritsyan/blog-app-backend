@@ -1,7 +1,7 @@
 import { prisma } from "../lib/prisma.js";
 
 class UserService {
-    async getAllUsers({ query, page, limit }) {
+    async getAllUsers({ query, page, limit }: { query: string; page: number; limit: number }) {
         const skip = (+page - 1) * +limit;
 
         const users = await prisma.user.findMany({
@@ -22,7 +22,15 @@ class UserService {
             }
         });
 
-        return users;
+        const totalCount = await prisma.user.count({
+            where: {
+                ...(query && {
+                    name: { contains: query, mode: "insensitive" },
+                }),
+            }
+        });
+
+        return { users, totalCount };
     }
 }
 
