@@ -2,7 +2,7 @@ import { prisma } from "../lib/prisma.js";
 import {PaginatedQuery} from "../types/types.js";
 
 class UserService {
-    async getAllUsers({ query, page, limit, orderBy, order }: Required<PaginatedQuery>) {
+    async getAllUsers({ query, page, limit, orderBy, order, authorId }: Required<PaginatedQuery>) {
         const skip = (+page - 1) * +limit;
 
         const users = await prisma.user.findMany({
@@ -10,6 +10,7 @@ class UserService {
                 ...(query && {
                     name: { contains: query, mode: "insensitive" },
                 }),
+                id: { not: authorId }
             },
 
             orderBy: {
