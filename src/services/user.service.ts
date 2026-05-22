@@ -26,17 +26,17 @@ class UserService {
         });
 
         // Get total users count
-        // const totalUsers = await prisma.user.count({
-        //     where: {
-        //         ...(query && {
-        //             name: { contains: query, mode: "insensitive" },
-        //         }),
-        //     }
-        // });
-        //
-        // const totalPages = totalUsers > 0 ? Math.ceil(totalUsers / +limit) : 1;
+        const totalUsers = await prisma.user.count({
+            where: {
+                ...(query && {
+                    name: { contains: query, mode: "insensitive" },
+                }),
+            }
+        });
 
-        return { users, totalPages: 10 };
+        const totalPages = totalUsers > 0 ? Math.ceil(totalUsers / +limit) : 1;
+
+        return { users, totalPages };
     }
 }
 
