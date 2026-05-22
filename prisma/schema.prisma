@@ -19,6 +19,8 @@ model User {
   password String
   posts    Post[]
 
+  createdAt DateTime @default(now())
+
   // Requests that sent this user
   sentFriendRequests     FriendRequest[] @relation("SentRequests")
   // Requests that received this user
@@ -58,5 +60,5 @@ model FriendRequest {
 enum FriendRequestStatus {
   PENDING
   ACCEPTED
-  DECLINED
+  REJECTED
 }

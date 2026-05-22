@@ -1,7 +1,7 @@
 import type { Request } from "express";
 
 // Blog post query params type
-export type BlogPostQuery = {
+export type PaginatedQuery = {
     query?: string;
     page?: string;
     limit?: string;
@@ -85,3 +85,6 @@ export type AuthRequest<
 > = Request<Params, ResBody, ReqBody, Query> & {
     userId?: number;
 }
+
+// Friends types
+export type FriendRequestStatus = "PENDING" | "ACCEPTED" | "REJECTED";

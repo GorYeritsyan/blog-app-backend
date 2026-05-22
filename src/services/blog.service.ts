@@ -1,4 +1,4 @@
-import type { BlogPost, BlogPostBody, BlogPostQuery, UpdateBlogPostProps } from "../types/types.js";
+import type { BlogPost, BlogPostBody, PaginatedQuery, UpdateBlogPostProps } from "../types/types.js";
 import { prisma } from "../lib/prisma.js";
 import {UserDto} from "../dto/user.dto.js";
 import {NotFoundError} from "../errors/index.js";
@@ -6,7 +6,7 @@ import {Prisma} from "../generated/prisma/client.js";
 
 class BlogService {
     // Get all blog posts service
-    async getBlogPosts({ query, limit, page, orderBy, order }: Required<BlogPostQuery>): Promise<{ data: BlogPost[]; totalPages: number }> {
+    async getBlogPosts({ query, limit, page, orderBy, order }: Required<PaginatedQuery>): Promise<{ data: BlogPost[]; totalPages: number }> {
         const skip = (+page - 1) * +limit;
 
         const allBlogPosts = await prisma.post.findMany({
@@ -20,7 +20,7 @@ class BlogService {
             },
 
             // Sort logic - { title: "asc" } || { content: "desc" } || etc...
-            // Default - { createdAt: "asc" }
+            // Default - { createdAt: "desc" }
             orderBy: {
                 [orderBy]: order
             },

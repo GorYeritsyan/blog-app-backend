@@ -2,12 +2,12 @@ import type { NextFunction, Response, Request } from "express";
 
 import { createBlogPostSchema, updateBlogPostSchema } from "../validations/index.js";
 import blogService from "../services/blog.service.js";
-import type { ApiResponse, AuthRequest, BlogPost, BlogPostBody, BlogPostQuery, Pagination } from "../types/types.js";
+import type { ApiResponse, AuthRequest, BlogPost, BlogPostBody, PaginatedQuery, Pagination } from "../types/types.js";
 import {AppError, BadRequestError, ForbiddenError, NotFoundError} from "../errors/index.js";
 
 class BlogController {
     // Get all paginated blog posts controller
-    async getBlogPosts(req: AuthRequest<{}, {}, {}, BlogPostQuery>, res: Response<ApiResponse<BlogPost[]>>) {
+    async getBlogPosts(req: AuthRequest<{}, {}, {}, PaginatedQuery>, res: Response<ApiResponse<BlogPost[]>>) {
         const { query = "", page = "1", limit = "10", orderBy = "createdAt", order = "desc" } = req.query;
 
         // Find all users with their posts

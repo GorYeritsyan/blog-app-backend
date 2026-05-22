@@ -1,4 +1,5 @@
 import { prisma } from "../lib/prisma.js";
+import {FriendRequestStatus} from "../types/types.js";
 
 class FriendService {
     async getAllFriendRequests() {
@@ -12,13 +13,20 @@ class FriendService {
         });
     }
 
+    // Accept friend request
     async acceptFriendRequest({ requestId }: { requestId: number }) {
-        const res = await prisma.friendRequest.update({
+        return prisma.friendRequest.update({
             where: { id: requestId },
             data: { status: "ACCEPTED" }
         });
+    }
 
-        console.log(res);
+    // Reject friend request
+    async rejectFriendRequest({ requestId }: { requestId: number }) {
+        return prisma.friendRequest.update({
+            where: { id: requestId },
+            data: { status: "REJECTED" }
+        });
     }
 
     // Receiver is current user

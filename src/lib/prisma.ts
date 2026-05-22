@@ -6,4 +6,9 @@ const adapter = new PrismaPg({
     connectionString: DATABASE_URL
 });
 
-export const prisma = new PrismaClient({ adapter });
+export const prisma = new PrismaClient({
+    adapter,
+    omit: {
+        user: { password: true }
+    }
+});

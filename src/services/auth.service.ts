@@ -14,7 +14,7 @@ class AuthService {
     // Login user service
     async login({ email, password }: LoginBody) {
         // Check if user exists
-        const user = await prisma.user.findUnique({ where: { email } });
+        const user = await prisma.user.findUnique({ where: { email }, omit: { password: false } });
         if (!user) throw new Error("Email is incorrect");
 
         // Check if password match
