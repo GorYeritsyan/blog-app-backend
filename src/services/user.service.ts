@@ -2,7 +2,7 @@ import { prisma } from "../lib/prisma.js";
 import {PaginatedQuery} from "../types/types.js";
 
 class UserService {
-    async getAllUsers({ query, page, limit, orderBy, order, authorId }: Required<PaginatedQuery>) {
+    async getAllUsers({ query, page, limit, orderBy, order, authorId }: Required<PaginatedQuery> & { authorId: number }) {
         const skip = (+page - 1) * +limit;
 
         const users = await prisma.user.findMany({
@@ -22,7 +22,8 @@ class UserService {
             skip,
 
             include: {
-                sentFriendRequests: true
+                sentFriendRequests: true,
+                receivedFriendRequests: true
             }
         });
 
