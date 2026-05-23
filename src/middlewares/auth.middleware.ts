@@ -20,7 +20,7 @@ const auth = async (req: AuthRequest, res: Response, next: NextFunction) => {
         req.userId = decoded.userId;
         next();
     } catch (err) {
-        next(new UnauthorizedError("Invalid token"));
+        next(new UnauthorizedError("Invalid or expired token"));
     }
 }
 

@@ -32,7 +32,7 @@ model Post {
   createdAt DateTime @default(now())
   title     String
   content   String
-  author    User     @relation(fields: [authorId], references: [id])
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId  Int
   tags      Tag[]
 }

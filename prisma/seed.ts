@@ -36,8 +36,8 @@ const mockData = [
 
 async function seedDB() {
     // Delete existing data
-    await prisma.user.deleteMany();
     await prisma.post.deleteMany();
+    await prisma.user.deleteMany();
 
     // Hash the mock user password
     const hashedPassword = await bcrypt.hash("password", 10);
