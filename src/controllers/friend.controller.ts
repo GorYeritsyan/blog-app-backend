@@ -7,7 +7,14 @@ import {prisma} from "../lib/prisma.js";
 class FriendController {
     async getAllRequests(req: AuthRequest, res: Response) {
         const allFriendRequests = await friendService.getAllFriendRequests();
-        res.json({ success: true, data: allFriendRequests });
+        res.status(200).json({ success: true, data: allFriendRequests });
+    }
+
+    async getIncomingRequests(req: AuthRequest, res: Response) {
+        const receiverId = req.userId;
+        const incomingRequests = await friendService.getIncomingRequests(receiverId!);
+
+        res.json({ success: true, data: incomingRequests });
     }
 
     // Send friend request to other user

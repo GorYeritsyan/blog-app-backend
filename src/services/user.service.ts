@@ -33,6 +33,7 @@ class UserService {
                 ...(query && {
                     name: { contains: query, mode: "insensitive" },
                 }),
+                id: { not: authorId }
             }
         });
 

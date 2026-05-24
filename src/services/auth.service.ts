@@ -8,7 +8,7 @@ import { ConflictError } from "../errors/http.error.js";
 
 class AuthService {
     async getMe(userId: number) {
-        return prisma.user.findUnique({ where: { id: userId } });
+        return prisma.user.findUnique({ where: { id: userId }, include: { sentFriendRequests: true, receivedFriendRequests: true } });
     }
 
     // Login user service

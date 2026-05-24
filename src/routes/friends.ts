@@ -6,6 +6,8 @@ const router = Router();
 
 router.get("/", auth, friendController.getAllRequests);
 
+router.get("/incoming", auth, friendController.getIncomingRequests);
+
 // POST - /api/friends
 router.post("/", auth, friendController.sendFriendRequest);
 
