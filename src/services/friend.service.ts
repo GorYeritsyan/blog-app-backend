@@ -1,5 +1,6 @@
 import { prisma } from "../lib/prisma.js";
 import {FriendRequestStatus} from "../types/types.js";
+import {NotFoundError} from "../errors/index.js";
 
 class FriendService {
     async getAllFriendRequests() {
@@ -42,10 +43,21 @@ class FriendService {
         });
     }
 
-    async removeFriend(requestId: number) {
-        return prisma.friendRequest.delete({
-            where: { id: requestId },
+    async removeFriend({ userId, friendId }: { userId: number; friendId: number }) {
+         const friendRequest = await prisma.friendRequest.findFirst({
+            where: {
+                OR: [
+                    { senderId: userId, receiverId: friendId },
+                    { senderId: friendId, receiverId: userId }
+                ]
+            }
         });
+
+         if (!friendRequest) throw new NotFoundError(`Friend with ID ${friendId} not found`);
+
+         return prisma.friendRequest.delete({
+             where: { id: friendRequest.id }
+         });
     }
 }
 

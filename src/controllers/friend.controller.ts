@@ -38,7 +38,9 @@ class FriendController {
     // TODO: For development
     async removeFriend(req: AuthRequest<{ id: string }>, res: Response) {
         const { id } = req.params;
-        const data = await friendService.removeFriend(+id);
+        const userId = req.userId;
+
+        const data = await friendService.removeFriend({ userId: userId!, friendId: +id });
 
         res.json({ success: true, data });
     }
