@@ -1,6 +1,7 @@
 import { Router } from "express";
 import auth from "../middlewares/auth.middleware.js";
 import friendController from "../controllers/friend.controller.js";
+import validateId from "../middlewares/validate-id.middleware.js";
 
 const router = Router();
 
@@ -12,8 +13,12 @@ router.get("/incoming", auth, friendController.getIncomingRequests);
 router.post("/", auth, friendController.sendFriendRequest);
 
 // PATCH - /api/friends/accept/:id
-router.patch("/accept/:id", friendController.acceptFriendRequest);
+router.patch("/accept/:id", auth, validateId, friendController.acceptFriendRequest);
 
-router.delete("/:id", auth, friendController.removeFriend);
+// PATCH - /api/friends/reject/:id
+router.patch("/reject/:id", auth, validateId, friendController.rejectFriendRequest);
+
+// DELETE - /api/friends
+router.delete("/:id", auth, validateId, friendController.removeFriend);
 
 export default router;

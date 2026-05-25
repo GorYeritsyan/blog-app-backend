@@ -22,13 +22,23 @@ class FriendService {
 
     // Send friend request
     async sendFriendRequest({ senderId, receiverId }: { senderId: number; receiverId: number }) {
-        return prisma.friendRequest.create({
-            data: { senderId, receiverId }
-        });
+       return prisma.friendRequest.upsert({
+           where: {
+               senderId_receiverId: {
+                   senderId,
+                   receiverId,
+               },
+               status: "REJECTED"
+           },
+           update: {
+               status: "PENDING"
+           },
+           create: { senderId, receiverId }
+       });
     }
 
     // Accept friend request
-    async acceptFriendRequest({ requestId }: { requestId: number }) {
+    async acceptFriendRequest(requestId: number) {
         return prisma.friendRequest.update({
             where: { id: requestId },
             data: { status: "ACCEPTED" }
@@ -36,7 +46,7 @@ class FriendService {
     }
 
     // Reject friend request
-    async rejectFriendRequest({ requestId }: { requestId: number }) {
+    async rejectFriendRequest(requestId: number) {
         return prisma.friendRequest.update({
             where: { id: requestId },
             data: { status: "REJECTED" }

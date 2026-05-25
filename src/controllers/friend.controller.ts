@@ -1,8 +1,7 @@
 import { Response } from "express";
 
 import friendService from "../services/friend.service.js";
-import {ApiResponse, AuthRequest, FriendRequestStatus} from "../types/types.js";
-import {prisma} from "../lib/prisma.js";
+import { AuthRequest } from "../types/types.js";
 
 class FriendController {
     async getAllRequests(req: AuthRequest, res: Response) {
@@ -30,12 +29,20 @@ class FriendController {
     async acceptFriendRequest(req: AuthRequest<{ id: string }>, res: Response) {
         const { id } = req.params;
 
-        const data = await friendService.acceptFriendRequest({ requestId: +id });
+        const data = await friendService.acceptFriendRequest(+id);
         
         res.json({ success: true, data });
     }
 
-    // TODO: For development
+    async rejectFriendRequest(req: AuthRequest<{ id: string }>, res: Response) {
+        const { id } = req.params;
+
+        const data = await friendService.rejectFriendRequest(+id);
+
+        res.json({ success: true, data });
+    }
+
+    // Remove friend
     async removeFriend(req: AuthRequest<{ id: string }>, res: Response) {
         const { id } = req.params;
         const userId = req.userId;
