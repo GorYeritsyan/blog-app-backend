@@ -36,9 +36,11 @@ class FriendController {
     }
 
     // TODO: For development
-    async deleteRequest(req, res) {
-        const data = await prisma.friendRequest.delete({ where: { id: +req.params.id } });
-        res.json({ success: true, data: data });
+    async removeFriend(req: AuthRequest<{ id: string }>, res: Response) {
+        const { id } = req.params;
+        const data = await friendService.removeFriend(+id);
+
+        res.json({ success: true, data });
     }
 }
 

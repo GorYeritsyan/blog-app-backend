@@ -14,6 +14,6 @@ router.post("/", auth, friendController.sendFriendRequest);
 // PATCH - /api/friends/accept/:id
 router.patch("/accept/:id", friendController.acceptFriendRequest);
 
-router.delete("/:id", auth, friendController.deleteRequest);
+router.delete("/:id", auth, friendController.removeFriend);
 
 export default router;

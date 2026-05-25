@@ -42,13 +42,10 @@ class FriendService {
         });
     }
 
-    // Receiver is current user
-    async getAllReceivedRequests({ receiverId }: { receiverId: number }) {
-        const allReceivedRequests = prisma.friendRequest.findMany({
-            where: { receiverId, status: "PENDING" }
+    async removeFriend(requestId: number) {
+        return prisma.friendRequest.delete({
+            where: { id: requestId },
         });
-
-        console.log(allReceivedRequests);
     }
 }
 
