@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import { prisma } from "../lib/prisma.js";
 import { LoginBody, RegisterBody, User } from "../types/types.js";
 import tokenService from "./token.service.js";
-import { ConflictError } from "../errors/http.error.js";
+import {BadRequestError, ConflictError} from "../errors/http.error.js";
 import { UserDto } from "../dto/user.dto.js";
 
 class AuthService {
@@ -15,11 +15,11 @@ class AuthService {
     async login({ email, password }: LoginBody) {
         // Check if user exists
         const user = await prisma.user.findUnique({ where: { email }, omit: { password: false } });
-        if (!user) throw new Error("Email is incorrect");
+        if (!user) throw new BadRequestError("Email is incorrect");
 
         // Check if password match
         const isPasswordMatch = await bcrypt.compare(password, user.password);
-        if (!isPasswordMatch) throw new Error("Password is incorrect");
+        if (!isPasswordMatch) throw new BadRequestError("Password is incorrect");
 
         // Generate access & refresh tokens
         const { accessToken, refreshToken } = tokenService.signTokens({ userId: user.id });
