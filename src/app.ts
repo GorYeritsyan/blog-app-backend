@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import path from "path";
 import cors from "cors";
 import { fileURLToPath } from "url";
+
 import errorMiddleware from "./middlewares/error.middleware.js";
 
 // Import Routes
@@ -38,7 +39,7 @@ app.use("/api/friends", friendsRouter);
 // Error middleware to handle all errors
 app.use(errorMiddleware);
 
-// TODO: Add global Error handler
+// Listen provided port
 app.listen(PORT, () => {
     console.log(`Listening on port ${PORT}`);
 });

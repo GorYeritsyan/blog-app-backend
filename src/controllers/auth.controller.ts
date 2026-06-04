@@ -13,30 +13,22 @@ class AuthController {
     }
 
     async login(req: Request<{}, {}, LoginBody>, res: Response) {
-        try {
-            const validLoginBody = await loginSchema.validateAsync(req.body);
-            const { user, accessToken, refreshToken } = await authService.login(validLoginBody);
+        const validLoginBody = await loginSchema.validateAsync(req.body);
+        const { user, accessToken, refreshToken } = await authService.login(validLoginBody);
 
-            // Set refresh token in the cookies
-            res.cookie("refreshToken", refreshToken, { httpOnly: true, sameSite: "none", maxAge: 7 * 24 * 60 * 60 * 1000 });
+        // Set refresh token in the cookies
+        res.cookie("refreshToken", refreshToken, { httpOnly: true, sameSite: "none", maxAge: 7 * 24 * 60 * 60 * 1000 });
 
-            // Send access token to client
-            res.json({ success: true, message: "You have successfully logged in.", data: { user, token: accessToken } });
-        } catch (err: any) {
-            res.json({ status: false, error: err.message });
-        }
+        // Send access token to client
+        res.json({ success: true, message: "You have successfully logged in.", data: { user, token: accessToken } });
     }
 
     async register(req: Request<{}, {}, RegisterBody>, res: Response) {
-        try {
-            const validRegisterBody = await registerSchema.validateAsync(req.body);
+        const validRegisterBody = await registerSchema.validateAsync(req.body);
 
-            const newUser = await authService.register(validRegisterBody);
+        const newUser = await authService.register(validRegisterBody);
 
-            res.status(201).json({ success: true, message: "You have successfully registered", data: newUser });
-        } catch(err: any) {
-            res.status(400).json({ status: false, error: err.message });
-        }
+        res.status(201).json({ success: true, message: "You have successfully registered", data: newUser });
     }
 
     // Refresh token

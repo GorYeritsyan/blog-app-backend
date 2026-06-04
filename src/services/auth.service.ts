@@ -4,6 +4,7 @@ import { prisma } from "../lib/prisma.js";
 import { LoginBody, RegisterBody, User } from "../types/types.js";
 import tokenService from "./token.service.js";
 import { ConflictError } from "../errors/http.error.js";
+import { UserDto } from "../dto/user.dto.js";
 
 class AuthService {
     async getMe(userId: number) {
@@ -23,7 +24,7 @@ class AuthService {
         // Generate access & refresh tokens
         const { accessToken, refreshToken } = tokenService.signTokens({ userId: user.id });
 
-        return { user, accessToken, refreshToken };
+        return { user: new UserDto(user), accessToken, refreshToken };
     }
 
     // Register user service
