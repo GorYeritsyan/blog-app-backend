@@ -88,7 +88,7 @@ class BlogService {
             }
         };
 
-        // If tags present in request body then attach it in query and create in the db
+        // If tags present in request body then attach it in custom query and create in the db
         if (tags && tags.length > 0) {
             createQuery.tags = {
                 connectOrCreate: tags.map(tag => ({
@@ -109,7 +109,7 @@ class BlogService {
 
     // Update blog post by ID service
     async updateBlogPost({ id, data, authorId }: UpdateBlogPostProps & { authorId: number }): Promise<BlogPost> {
-        const { title, content } = data;
+        const { title, content, tags } = data;
 
         const updateQuery: Prisma.PostUpdateInput = {
             title,
@@ -120,13 +120,15 @@ class BlogService {
         };
 
         // TODO: Check update query logic
-        if (data.tags && data.tags.length > 0) {
-            updateQuery.tags = {
+        if (tags) {
+            updateQuery.tags = tags.length > 0 ? {
                 set: [],
-                connectOrCreate: data.tags.map(tag => ({
+                connectOrCreate: tags.map(tag => ({
                     where: { title: tag },
                     create: { title: tag },
                 }))
+            } : {
+                set: [],
             }
         }
 

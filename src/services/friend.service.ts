@@ -1,6 +1,5 @@
 import { prisma } from "../lib/prisma.js";
-import {FriendRequestStatus} from "../types/types.js";
-import {NotFoundError} from "../errors/index.js";
+import { NotFoundError } from "../errors/index.js";
 
 class FriendService {
     async getAllFriendRequests() {
@@ -22,7 +21,8 @@ class FriendService {
 
     // Send friend request
     async sendFriendRequest({ senderId, receiverId }: { senderId: number; receiverId: number }) {
-       return prisma.friendRequest.upsert({
+        // If status rejected then send friend request again
+        return prisma.friendRequest.upsert({
            where: {
                senderId_receiverId: {
                    senderId,
