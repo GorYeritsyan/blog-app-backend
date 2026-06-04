@@ -3,7 +3,6 @@ import bcrypt from "bcryptjs";
 import { prisma } from "../lib/prisma.js";
 import { LoginBody, RegisterBody, User } from "../types/types.js";
 import tokenService from "./token.service.js";
-import { UserDto } from "../dto/user.dto.js";
 import { ConflictError } from "../errors/http.error.js";
 
 class AuthService {
@@ -24,7 +23,7 @@ class AuthService {
         // Generate access & refresh tokens
         const { accessToken, refreshToken } = tokenService.signTokens({ userId: user.id });
 
-        return { user: new UserDto(user), accessToken, refreshToken };
+        return { user, accessToken, refreshToken };
     }
 
     // Register user service
@@ -37,9 +36,7 @@ class AuthService {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Create new user
-        const newUser = await prisma.user.create({ data: { name, email, password: hashedPassword } });
-
-         return new UserDto(newUser);
+        return prisma.user.create({ data: { name, email, password: hashedPassword } });
     }
 }
 
