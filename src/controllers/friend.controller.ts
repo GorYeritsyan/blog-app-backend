@@ -9,6 +9,13 @@ class FriendController {
         res.status(200).json({ success: true, data: allFriendRequests });
     }
 
+    async getFriends(req: AuthRequest, res: Response) {
+        const userId = req.userId;
+
+        const friends = await friendService.getFriends(userId!);
+        res.status(200).json({ success: true, data: friends });
+    }
+
     async getIncomingRequests(req: AuthRequest, res: Response) {
         const receiverId = req.userId;
         const incomingRequests = await friendService.getIncomingRequests(receiverId!);

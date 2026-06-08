@@ -6,6 +6,19 @@ class FriendService {
         return prisma.friendRequest.findMany();
     }
 
+    // Get current user all friends
+    async getFriends(userId: number) {
+        return prisma.friendRequest.findMany({
+            where: {
+                OR: [
+                    { senderId: userId },
+                    { receiverId: userId }
+                ],
+                status: "ACCEPTED"
+            }
+        });
+    }
+
     // Get all incoming requests that need to be accepted or rejected
     async getIncomingRequests(receiverId: number) {
         return prisma.friendRequest.findMany({

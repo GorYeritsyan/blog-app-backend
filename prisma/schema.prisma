@@ -25,6 +25,10 @@ model User {
   sentFriendRequests     FriendRequest[] @relation("SentRequests")
   // Requests that received this user
   receivedFriendRequests FriendRequest[] @relation("ReceivedRequests")
+
+  // Messages
+  sentMessages     Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
 }
 
 model Post {
@@ -57,21 +61,15 @@ model FriendRequest {
   @@unique([senderId, receiverId])
 }
 
-model Room {
-  id        Int       @id @default(autoincrement())
-  messages  Message[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-}
-
 model Message {
-  id        Int      @id @default(autoincrement())
-  content   String
-  senderId  Int
-  room      Room     @relation(fields: [roomId], references: [id])
-  roomId    Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         Int      @id @default(autoincrement())
+  content    String
+  sender     User     @relation("SentMessages", fields: [senderId], references: [id])
+  senderId   Int
+  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  receiverId Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 enum FriendRequestStatus {
