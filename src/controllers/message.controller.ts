@@ -13,7 +13,7 @@ class MessageController {
 
         console.log("Messages", messages);
 
-        res.json({ success: true, data: [] });
+        res.status(200).json({ success: true, data: messages });
     }
 
     // Send message controller
@@ -26,7 +26,7 @@ class MessageController {
 
         console.log("Sent Message", sentMessage);
 
-        res.json({ success: true, data: [] });
+        res.json({ success: true, data: sentMessage });
     }
 }
 

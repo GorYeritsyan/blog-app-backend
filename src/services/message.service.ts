@@ -9,7 +9,10 @@ class MessageService {
                     { senderId: currentUserId, receiverId: friendId },
                     { senderId: friendId, receiverId: currentUserId },
                 ]
-            }
+            },
+           include: {
+                sender: true,
+           }
         })
     }
 
