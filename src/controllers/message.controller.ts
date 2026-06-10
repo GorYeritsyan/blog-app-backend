@@ -1,19 +1,29 @@
 import { type Request, type Response } from "express";
 import messageService from "../services/message.service.js";
-import {AuthRequest} from "../types/types.js";
+import {AuthRequest, type Pagination} from "../types/types.js";
 import userService from "../services/user.service.js";
 import friendService from "../services/friend.service.js";
 
 class MessageController {
-    async getMessages(req: AuthRequest<{ id: string }>, res: Response) {
+    async getMessages(req: AuthRequest<{ id: string }, {}, {}, { page?: string; limit?: string }>, res: Response) {
         const { id } = req.params;
+        const { page = "1", limit = "10" } = req.query;
         const currentUserId = req.userId;
 
-        const messages = await messageService.getMessages({ currentUserId: currentUserId!, friendId: +id });
+        const { data, totalPages } = await messageService.getMessages({
+            currentUserId: currentUserId!,
+            friendId: +id,
+            page,
+            limit
+        });
 
-        console.log("Messages", messages);
+        // Create pagination - todo create pagination utility function to create similar structure
+        const pagination: Pagination = { currentPage: +page, totalPages, hasNext: +page < totalPages, hasPrev: +page > 1 };
 
-        res.status(200).json({ success: true, data: messages });
+        res.status(200).json({
+            success: true,
+            data: { items: data, pagination }
+        });
     }
 
     // Send message controller

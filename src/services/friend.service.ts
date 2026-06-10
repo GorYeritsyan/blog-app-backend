@@ -41,20 +41,65 @@ class FriendService {
 
     // Send friend request
     async sendFriendRequest({ senderId, receiverId }: { senderId: number; receiverId: number }) {
+        const existingRequest = await prisma.friendRequest.findFirst({
+            where: {
+                OR: [
+                    { senderId, receiverId },
+                    { senderId: receiverId, receiverId: senderId },
+                ]
+            }
+        });
+
+        // If there is no request, create new one
+        if (!existingRequest) {
+            return prisma.friendRequest.create({
+                data: {
+                    senderId,
+                    receiverId
+                }
+            });
+        }
+
+        // If my request rejected, send again (update rejected to pending)
+        if (existingRequest.senderId === senderId && existingRequest.status === "REJECTED") {
+            return prisma.friendRequest.update({
+                where: {
+                    id: existingRequest.id
+                },
+
+                data: {
+                    status: "PENDING"
+                }
+            })
+        }
+
+        // If someone send request to me, and I'm sending too, automatically accept it
+        if (existingRequest.receiverId === senderId && existingRequest.status === "PENDING") {
+            return prisma.friendRequest.update({
+                where: {
+                    id: existingRequest.id
+                },
+                data: {
+                    status: "ACCEPTED"
+                }
+            })
+        }
+
+        return existingRequest;
         // If status rejected then send friend request again
-        return prisma.friendRequest.upsert({
-           where: {
-               senderId_receiverId: {
-                   senderId,
-                   receiverId,
-               },
-               status: "REJECTED"
-           },
-           update: {
-               status: "PENDING"
-           },
-           create: { senderId, receiverId }
-       });
+       //  return prisma.friendRequest.upsert({
+       //     where: {
+       //         senderId_receiverId: {
+       //             senderId,
+       //             receiverId,
+       //         },
+       //         status: "REJECTED"
+       //     },
+       //     update: {
+       //         status: "PENDING"
+       //     },
+       //     create: { senderId, receiverId }
+       // });
     }
 
     // Accept friend request

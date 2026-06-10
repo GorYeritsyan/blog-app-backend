@@ -2,21 +2,41 @@ import { prisma } from "../lib/prisma.js";
 
 class MessageService {
     // Get all messages, where I'm message sender or receiver from my friend
-    async getMessages({ currentUserId, friendId }: { currentUserId: number; friendId: number }) {
-       return prisma.message.findMany({
+    async getMessages({ currentUserId, friendId, page, limit }: { currentUserId: number; friendId: number; page: string; limit: string }) {
+        const skip = (+(page) - 1) * +limit;
+
+        // Total messages
+        const messages = await prisma.message.findMany({
             where: {
                 OR: [
                     { senderId: currentUserId, receiverId: friendId },
                     { senderId: friendId, receiverId: currentUserId },
                 ]
             },
-           orderBy: {
+            orderBy: {
                 createdAt: "desc"
-           },
-           include: {
+            },
+            take: 10,
+            skip,
+
+            include: {
                 sender: true,
-           }
-        })
+            }
+        });
+
+        // Total count
+        const totalMessagesCount = await prisma.message.count({
+            where: {
+                OR: [
+                    { senderId: currentUserId, receiverId: friendId },
+                    { senderId: friendId, receiverId: currentUserId },
+                ]
+            },
+        });
+
+        const totalPages = totalMessagesCount > 0 ? Math.ceil(totalMessagesCount / +limit) : 1;
+
+        return { data: messages, totalPages };
     }
 
     // Send message service
