@@ -10,6 +10,9 @@ class MessageService {
                     { senderId: friendId, receiverId: currentUserId },
                 ]
             },
+           orderBy: {
+                createdAt: "desc"
+           },
            include: {
                 sender: true,
            }
