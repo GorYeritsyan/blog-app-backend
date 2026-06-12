@@ -7,14 +7,15 @@ class FriendService {
     }
 
     // Get current user all friends
-    async getFriends(userId: number) {
+    async getFriends(userId: number, query?: string) {
         const acceptedFriendRequests = await prisma.friendRequest.findMany({
             where: {
                 OR: [
                     { senderId: userId },
                     { receiverId: userId }
                 ],
-                status: "ACCEPTED"
+                status: "ACCEPTED",
+                ...(query && { name: { contains: query, mode: "insensitive" } }),
             },
             include: {
                 sender: true,
