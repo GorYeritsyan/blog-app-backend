@@ -76,14 +76,16 @@ class FriendService {
 
         // If someone send request to me, and I'm sending too, automatically accept it
         if (existingRequest.receiverId === senderId && existingRequest.status === "PENDING") {
-            return prisma.friendRequest.update({
-                where: {
-                    id: existingRequest.id
-                },
-                data: {
-                    status: "ACCEPTED"
-                }
-            })
+            // return prisma.friendRequest.update({
+            //     where: {
+            //         id: existingRequest.id
+            //     },
+            //     data: {
+            //         status: "ACCEPTED"
+            //     }
+            // })
+
+            return await this.acceptFriendRequest(existingRequest.id!);
         }
 
         return existingRequest;
@@ -104,11 +106,61 @@ class FriendService {
     }
 
     // Accept friend request
+    // async acceptFriendRequest(requestId: number) {
+    //     return prisma.friendRequest.update({
+    //         where: { id: requestId },
+    //         data: { status: "ACCEPTED" }
+    //     });
+    // }
+
     async acceptFriendRequest(requestId: number) {
-        return prisma.friendRequest.update({
-            where: { id: requestId },
-            data: { status: "ACCEPTED" }
+        const acceptedFriendRequest = await prisma.friendRequest.findUnique({
+            where: {
+                id: requestId,
+                status: "ACCEPTED"
+            }
         });
+
+        // If there is no accepted request with requestId, then accept friend request and create room for that members
+        if (!acceptedFriendRequest) {
+            return prisma.$transaction(async (tx) => {
+                // accept the request
+                const request = await tx.friendRequest.update({
+                    where: { id: requestId },
+                    data: { status: "ACCEPTED" }
+                })
+
+                // create the DM room between the two users
+                const existingRoom = await tx.room.findFirst({
+                    where: {
+                        AND: [
+                            { members: { some: { userId: request.senderId } } },
+                            { members: { some: { userId: request.receiverId } } }
+                        ],
+                    }
+                });
+
+                // If room doesn't exist then create
+                if (!existingRoom) {
+                    await tx.room.create({
+                        data: {
+                            type: "DM",
+
+                            members: {
+                                create: [
+                                    { userId: request.senderId },
+                                    { userId: request.receiverId }
+                                ]
+                            }
+                        }
+                    });
+                }
+
+                return request
+            });
+        }
+
+        return acceptedFriendRequest;
     }
 
     // Reject friend request

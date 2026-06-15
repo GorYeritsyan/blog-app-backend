@@ -13,6 +13,7 @@ import authRouter from "./routes/auth.js";
 import usersRouter from "./routes/users.js";
 import friendsRouter from "./routes/friends.js";
 import messagesRouter from "./routes/messages.js";
+import roomsRouter from "./routes/rooms.js";
 
 // For .env.* files (process.env.ENV_VARIABLES)
 dotenv.config();
@@ -37,6 +38,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/users", usersRouter);
 app.use("/api/friends", friendsRouter);
 app.use("/api/messages", messagesRouter);
+app.use("/api/rooms", roomsRouter);
 
 // Error middleware to handle all errors
 app.use(errorMiddleware);

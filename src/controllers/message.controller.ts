@@ -1,8 +1,7 @@
-import { type Request, type Response } from "express";
+import { type Response } from "express";
+
+import { type AuthRequest, type Pagination} from "../types/types.js";
 import messageService from "../services/message.service.js";
-import {AuthRequest, type Pagination} from "../types/types.js";
-import userService from "../services/user.service.js";
-import friendService from "../services/friend.service.js";
 
 class MessageController {
     async getMessages(req: AuthRequest<{ id: string }, {}, {}, { page?: string; limit?: string }>, res: Response) {
@@ -12,7 +11,7 @@ class MessageController {
 
         const { data, totalPages } = await messageService.getMessages({
             currentUserId: currentUserId!,
-            friendId: +id,
+            roomId: +id,
             page,
             limit
         });
@@ -32,11 +31,9 @@ class MessageController {
         const { content } = req.body;
         const currentUserId = req.userId;
 
-        const sentMessage = await messageService.sendMessage({ currentUserId: currentUserId!, friendId: +id, content });
+        const sentMessage = await messageService.sendMessage({ currentUserId: currentUserId!, roomId: +id, content });
 
-        console.log("Sent Message", sentMessage);
-
-        res.json({ success: true, data: sentMessage });
+        res.status(201).json({ success: true, data: sentMessage });
     }
 }
 

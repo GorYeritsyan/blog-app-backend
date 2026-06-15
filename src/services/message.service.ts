@@ -2,16 +2,13 @@ import { prisma } from "../lib/prisma.js";
 
 class MessageService {
     // Get all messages, where I'm message sender or receiver from my friend
-    async getMessages({ currentUserId, friendId, page, limit }: { currentUserId: number; friendId: number; page: string; limit: string }) {
+    async getMessages({ currentUserId, roomId, page, limit }: { currentUserId: number; roomId: number; page: string; limit: string }) {
         const skip = (+(page) - 1) * +limit;
 
-        // Total messages
+        // All messages by roomId
         const messages = await prisma.message.findMany({
             where: {
-                OR: [
-                    { senderId: currentUserId, receiverId: friendId },
-                    { senderId: friendId, receiverId: currentUserId },
-                ]
+                roomId
             },
             orderBy: {
                 createdAt: "desc"
@@ -24,13 +21,10 @@ class MessageService {
             }
         });
 
-        // Total count
+        // Total messages count
         const totalMessagesCount = await prisma.message.count({
             where: {
-                OR: [
-                    { senderId: currentUserId, receiverId: friendId },
-                    { senderId: friendId, receiverId: currentUserId },
-                ]
+                roomId
             },
         });
 
@@ -40,11 +34,10 @@ class MessageService {
     }
 
     // Send message service
-    async sendMessage({ currentUserId, friendId, content }: { currentUserId: number; friendId: number; content: string }) {
-        // prisma.friendRequest.findUnique({ where: {  } })
+    async sendMessage({ currentUserId, roomId, content }: { currentUserId: number; roomId: number; content: string }) {
         // todo: check if receiver is current user friend
         return prisma.message.create({
-            data: { senderId: currentUserId, receiverId: friendId, content },
+            data: { senderId: currentUserId, roomId, content },
         });
     }
 }

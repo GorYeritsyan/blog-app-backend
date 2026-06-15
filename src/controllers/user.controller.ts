@@ -1,6 +1,6 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 import userService from "../services/user.service.js";
-import {AuthRequest, PaginatedQuery, type Pagination} from "../types/types.js";
+import { AuthRequest, PaginatedQuery, type Pagination } from "../types/types.js";
 
 class UserController {
     async getAllUsers(req: AuthRequest<{}, {}, {}, PaginatedQuery>, res: Response) {
