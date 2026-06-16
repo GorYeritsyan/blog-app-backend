@@ -30,7 +30,7 @@ class RoomController {
         res.status(201).json({ success: true, data: createdRoom });
     }
 
-    async updateRoom(req: AuthRequest<{ id?: string }>, res: Response) {
+    async updateRoom(req: AuthRequest<{ id: string }>, res: Response) {
         const { id } = req.params;
         const currentUserId = req.userId;
 
@@ -41,14 +41,18 @@ class RoomController {
         }
 
         const { name, memberIds } = value;
-        console.log("room id", +id)
-
         const updatedRoom = await roomService.updateRoom({ roomId: +id, currentUserId: currentUserId!, name, memberIds });
 
         res.status(200).json({ success: true, data: updatedRoom });
     }
 
+    async leaveRoom(req: AuthRequest<{ id: string }>, res: Response) {
+        const { id } = req.params;
+        const currentUserId = req.userId;
 
+        const leavedMember = await roomService.leaveRoom({ roomId: +id, userId: currentUserId! });
+        res.status(200).json({ success: true, data: leavedMember });
+    }
 }
 
 export default new RoomController();

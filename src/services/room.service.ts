@@ -118,6 +118,28 @@ class RoomService {
             }
         });
     }
+
+    async leaveRoom({ roomId, userId }: { roomId: number; userId: number }) {
+        const member = await prisma.member.findUnique({
+            where: {
+                roomId_userId: {
+                    roomId,
+                    userId,
+                }
+            }
+        });
+
+        if (!member) throw new BadRequestError("You are not a member of this room");
+
+        return prisma.member.delete({
+            where: {
+                roomId_userId: {
+                    roomId,
+                    userId
+                }
+            }
+        })
+    }
 }
 
 export default new RoomService();
