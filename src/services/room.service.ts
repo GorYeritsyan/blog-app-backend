@@ -20,7 +20,10 @@ class RoomService {
                 },
                 messages: {
                     orderBy: { createdAt: "desc" },
-                    take: 1
+                    take: 1,
+                    include: {
+                        sender: true
+                    }
                 }
             },
         });
