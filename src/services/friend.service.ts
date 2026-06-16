@@ -145,7 +145,6 @@ class FriendService {
                     await tx.room.create({
                         data: {
                             type: "DM",
-
                             members: {
                                 create: [
                                     { userId: request.senderId },

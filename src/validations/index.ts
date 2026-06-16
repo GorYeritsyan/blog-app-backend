@@ -25,3 +25,8 @@ export const registerSchema = joi.object<RegisterBody>({
     password:  joi.string().pattern(/^[a-zA-Z0-9]{3,30}$/).required(),
     confirmPassword: joi.ref("password"),
 });
+
+export const groupChatSchema = joi.object({
+    name: joi.string().min(3).max(255).required(),
+    memberIds: joi.array().items(joi.number()).min(1).required(),
+});
