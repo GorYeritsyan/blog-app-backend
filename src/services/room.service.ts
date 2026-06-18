@@ -35,7 +35,11 @@ class RoomService {
                 id: roomId
             },
             include: {
-                members: true,
+                members: {
+                    include: {
+                        user: true
+                    },
+                },
             }
         });
     }

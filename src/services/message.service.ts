@@ -51,9 +51,20 @@ class MessageService {
         }
 
         // todo: check if receiver is current user friend
-        return prisma.message.create({
-            data: { senderId: currentUserId, roomId, content },
-        });
+        const [sentMessage] = await prisma.$transaction([
+            prisma.message.create({
+                data: { senderId: currentUserId, roomId, content },
+            }),
+
+            prisma.room.update({
+                where: {
+                    id: roomId
+                },
+                data: { updatedAt: new Date() }
+            })
+        ]);
+
+        return sentMessage;
     }
 }
 
