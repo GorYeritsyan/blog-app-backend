@@ -8,6 +8,8 @@ const router = Router();
 // Get current user all rooms
 router.get("/", auth, roomController.getAllRooms);
 
+router.get("/:id", auth, validateId, roomController.getRoomById);
+
 router.post("/", auth, roomController.createRoom);
 
 router.patch("/:id", auth, validateId, roomController.updateRoom);

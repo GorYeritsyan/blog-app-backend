@@ -3,7 +3,7 @@ import { type Response } from "express";
 import { type AuthRequest } from "../types/types.js";
 import roomService from "../services/room.service.js";
 import {groupChatSchema} from "../validations/index.js";
-import {BadRequestError} from "../errors/index.js";
+import {BadRequestError, ForbiddenError, NotFoundError} from "../errors/index.js";
 import userService from "../services/user.service.js";
 import friendService from "../services/friend.service.js";
 
@@ -14,6 +14,22 @@ class RoomController {
         const rooms = await roomService.getAllRooms(userId!);
 
         res.status(200).json({ success: true, data: rooms });
+    }
+
+    async getRoomById(req: AuthRequest<{ id: string }>, res: Response) {
+        const { id } = req.params;
+        const currentUserId = req.userId;
+
+        const room = await roomService.getRoomById(+id);
+        if (!room) throw new NotFoundError(`Room with ID ${id} not found`);
+
+        if (room.type === "GROUP") {
+            const isMember = room.members.find(member => member.userId === currentUserId);
+
+            if (!isMember) throw new ForbiddenError(`You are not a member room with ID ${id}`);
+        }
+
+        res.status(200).json({ success: true, data: room });
     }
 
     async createRoom(req: AuthRequest<{ id?: string }>, res: Response) {

@@ -1,5 +1,5 @@
 import { prisma } from "../lib/prisma.js";
-import {BadRequestError} from "../errors/index.js";
+import {BadRequestError, NotFoundError} from "../errors/index.js";
 
 class RoomService {
     async getAllRooms(userId: number) {
@@ -29,6 +29,17 @@ class RoomService {
         });
     }
 
+    async getRoomById(roomId: number) {
+        return prisma.room.findUnique({
+            where: {
+                id: roomId
+            },
+            include: {
+                members: true,
+            }
+        });
+    }
+
     async createRoom({ roomId, name, memberIds, currentUserId }) {
         const allIds = [...new Set([currentUserId, ...memberIds])];
 
@@ -55,6 +66,9 @@ class RoomService {
                 members: {
                     create: allIds.map(userId => ({ userId })),
                 },
+            },
+            include: {
+                members: true
             }
         });
     }
