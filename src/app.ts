@@ -3,7 +3,9 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import path from "path";
 import cors from "cors";
+import { createServer } from "http";
 import { fileURLToPath } from "url";
+import { Server } from "socket.io";
 
 import errorMiddleware from "./middlewares/error.middleware.js";
 
@@ -25,6 +27,17 @@ export const __dirname = path.dirname(__filename);
 const PORT = process.env.PORT || 8080;
 
 const app = express();
+const server = createServer(app);
+// const io = new Server(server, {
+//     cors: {
+//         origin: ["http://localhost:3000"],
+//         credentials: true,
+//     }
+// });
+
+// io.on("connection", (socket) => {
+//    console.log(socket.id, "connected");
+// });
 
 // Parse req.body
 app.use(express.json());
@@ -44,6 +57,6 @@ app.use("/api/rooms", roomsRouter);
 app.use(errorMiddleware);
 
 // Listen provided port
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Listening on port ${PORT}`);
 });
