@@ -1,4 +1,5 @@
 import { prisma } from "../lib/prisma.js";
+import {BadRequestError} from "../errors/index.js";
 
 class MessageService {
     // Get all messages, where I'm message sender or receiver from my friend
@@ -35,6 +36,20 @@ class MessageService {
 
     // Send message service
     async sendMessage({ currentUserId, roomId, content }: { currentUserId: number; roomId: number; content: string }) {
+        // check if user is member to that conversation
+        const memberUser = await prisma.member.findUnique({
+            where: {
+                roomId_userId: {
+                    roomId,
+                    userId: currentUserId,
+                }
+            }
+        });
+
+        if (!memberUser) {
+            throw new BadRequestError("You can't send messages in this conversation.");
+        }
+
         // todo: check if receiver is current user friend
         return prisma.message.create({
             data: { senderId: currentUserId, roomId, content },
