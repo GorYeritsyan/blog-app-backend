@@ -14,6 +14,10 @@ router.post("/", auth, roomController.createRoom);
 
 router.patch("/:id", auth, validateId, roomController.updateRoom);
 
-router.delete("/:id", auth, validateId, roomController.leaveRoom);
+// Remove room by id
+router.delete("/:id", auth, validateId, roomController.removeRoom);
+
+// Leave room by room id
+router.delete("/:id/leave", auth, validateId, roomController.leaveRoom);
 
 export default router;

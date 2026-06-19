@@ -74,6 +74,16 @@ class RoomController {
     // TODO: add remove room controller
     // TODO: fix logic to remove rooms only if creator is current user, otherwise user don't have permission to remove room by id
 
+    async removeRoom(req: AuthRequest<{ id: string }>, res: Response) {
+        const { id } = req.params;
+        const currentUserId = req.userId;
+
+        // todo: add permission to remove room only if room created by that user
+        const removedRoom = await roomService.removeRoom(+id);
+
+        res.status(200).json({ success: true, data: removedRoom });
+    }
+
     async leaveRoom(req: AuthRequest<{ id: string }>, res: Response) {
         const { id } = req.params;
         const currentUserId = req.userId;

@@ -140,6 +140,14 @@ class RoomService {
         });
     }
 
+    async removeRoom(roomId: number) {
+        return prisma.room.delete({
+            where: {
+                id: roomId
+            }
+        });
+    }
+
     async leaveRoom({ roomId, userId }: { roomId: number; userId: number }) {
         const member = await prisma.member.findUnique({
             where: {
