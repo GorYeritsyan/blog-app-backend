@@ -1,8 +1,8 @@
 import express from "express";
 import { Server } from "socket.io";
 import { createServer } from "http";
-import {UnauthorizedError} from "./errors/index.js";
-import jwt, {JwtPayload} from "jsonwebtoken";
+import { UnauthorizedError } from "./errors/index.js";
+import { JwtPayload } from "jsonwebtoken";
 import tokenService from "./services/token.service.js";
 
 const app = express();
@@ -16,8 +16,13 @@ const io = new Server(server, {
     }
 });
 
+const onlineUsers = new Map();
+
+// Authentication middleware
 io.use((socket, next) => {
+    console.log(socket.id, "middleware");
     const token = socket.handshake.auth?.token;
+    console.log("TOKEN", token);
     if (!token) return next(new UnauthorizedError());
 
     try {
@@ -31,11 +36,21 @@ io.use((socket, next) => {
 
 io.on("connection", (socket) => {
     console.log(`user with id ${socket.data.userId} connected`);
+    console.log("online map", onlineUsers);
+
+    if (!onlineUsers.has(socket.data.userId)) {
+        onlineUsers.set(socket.data.userId, socket.id);
+    }
+
+    console.log("online users", [...onlineUsers.keys()])
+
+    io.emit("online_users", [...onlineUsers.keys()]);
 
     socket.on("disconnect", () => {
         console.log(`user with id ${socket.data.userId} disconnected`);
+        onlineUsers.delete(socket.data.userId);
+        io.emit("online_users", [...onlineUsers.keys()]);
     });
-    // socket.emit("join", socket.id);
 });
 
 // Listen provided port
