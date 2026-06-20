@@ -20,9 +20,7 @@ const onlineUsers = new Map();
 
 // Authentication middleware
 io.use((socket, next) => {
-    console.log(socket.id, "middleware");
     const token = socket.handshake.auth?.token;
-    console.log("TOKEN", token);
     if (!token) return next(new UnauthorizedError());
 
     try {
@@ -35,14 +33,9 @@ io.use((socket, next) => {
 });
 
 io.on("connection", (socket) => {
-    console.log(`user with id ${socket.data.userId} connected`);
-    console.log("online map", onlineUsers);
-
     if (!onlineUsers.has(socket.data.userId)) {
         onlineUsers.set(socket.data.userId, socket.id);
     }
-
-    console.log("online users", [...onlineUsers.keys()])
 
     io.emit("online_users", [...onlineUsers.keys()]);
 
