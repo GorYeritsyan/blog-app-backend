@@ -41,6 +41,11 @@ io.on("connection", (socket) => {
     // Show online users
     io.emit("online_users", [...onlineUsers.keys()]);
 
+    // Handle join room
+    socket.on("join_room", (roomId) => {
+        socket.join(roomId);
+    });
+
     // Message handler
     socket.on("message", async ({ roomId, content }, callback) => {
         const currentUserId = socket.data.userId;
@@ -51,8 +56,11 @@ io.on("connection", (socket) => {
         callback();
     });
 
-    socket.on("join_room", (roomId) => {
-       socket.join(roomId);
+    // Handle typing indicator
+    socket.on("typing", ({ roomId, user, isTyping }) => {
+        console.log("typing")
+        const currentUserId = socket.data.userId;
+        io.to(roomId).emit("typing", { roomId, user, userId: currentUserId, isTyping });
     });
 
     // Disconnection handler
