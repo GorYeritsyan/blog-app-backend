@@ -4,6 +4,7 @@ import { createServer } from "http";
 import { UnauthorizedError } from "./errors/index.js";
 import { JwtPayload } from "jsonwebtoken";
 import tokenService from "./services/token.service.js";
+import messageService from "./services/message.service.js";
 
 const app = express();
 const server = createServer(app);
@@ -37,8 +38,24 @@ io.on("connection", (socket) => {
         onlineUsers.set(socket.data.userId, socket.id);
     }
 
+    // Show online users
     io.emit("online_users", [...onlineUsers.keys()]);
 
+    // Message handler
+    socket.on("message", async ({ roomId, content }, callback) => {
+        const currentUserId = socket.data.userId;
+
+        const sentMessage = await messageService.sendMessage({ currentUserId: currentUserId!, roomId, content });
+
+        io.to(roomId).emit("message", sentMessage);
+        callback();
+    });
+
+    socket.on("join_room", (roomId) => {
+       socket.join(roomId);
+    });
+
+    // Disconnection handler
     socket.on("disconnect", () => {
         console.log(`user with id ${socket.data.userId} disconnected`);
         onlineUsers.delete(socket.data.userId);

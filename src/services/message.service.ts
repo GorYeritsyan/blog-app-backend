@@ -54,6 +54,9 @@ class MessageService {
         const [sentMessage] = await prisma.$transaction([
             prisma.message.create({
                 data: { senderId: currentUserId, roomId, content },
+                include: {
+                    sender: true,
+                }
             }),
 
             prisma.room.update({
