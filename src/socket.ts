@@ -42,25 +42,28 @@ io.on("connection", (socket) => {
     io.emit("online_users", [...onlineUsers.keys()]);
 
     // Handle join room
-    socket.on("join_room", (roomId) => {
+    socket.on("join_room", (roomId: string) => {
         socket.join(roomId);
     });
 
+    socket.on("leave_room", (roomId: string) => {
+        socket.leave(roomId);
+    });
+
     // Message handler
-    socket.on("message", async ({ roomId, content }, callback) => {
+    socket.on("message", async ({ roomId, content }: { roomId: string; content: string }, callback) => {
         const currentUserId = socket.data.userId;
 
-        const sentMessage = await messageService.sendMessage({ currentUserId: currentUserId!, roomId, content });
+        const sentMessage = await messageService.sendMessage({ currentUserId: currentUserId!, roomId: +roomId, content });
 
         io.to(roomId).emit("message", sentMessage);
         callback();
     });
 
     // Handle typing indicator
-    socket.on("typing", ({ roomId, user, isTyping }) => {
-        console.log("typing")
+    socket.on("typing", ({ roomId, user, isTyping }: { roomId: string; user: string; isTyping: boolean }) => {
         const currentUserId = socket.data.userId;
-        io.to(roomId).emit("typing", { roomId, user, userId: currentUserId, isTyping });
+        socket.to(roomId).emit("typing", { roomId, user, userId: currentUserId, isTyping });
     });
 
     // Disconnection handler
