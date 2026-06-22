@@ -5,6 +5,7 @@ import { UnauthorizedError } from "./errors/index.js";
 import { JwtPayload } from "jsonwebtoken";
 import tokenService from "./services/token.service.js";
 import messageService from "./services/message.service.js";
+import roomService from "./services/room.service.js";
 
 const app = express();
 const server = createServer(app);
@@ -56,7 +57,18 @@ io.on("connection", (socket) => {
 
         const sentMessage = await messageService.sendMessage({ currentUserId: currentUserId!, roomId: +roomId, content });
 
+        // Send message to online users
         io.to(roomId).emit("message", sentMessage);
+
+        const roomMembers = await roomService.getRoomMembers(+roomId);
+        roomMembers?.forEach(member => {
+            const memberSocketId = onlineUsers.get(member.userId);
+
+            if (memberSocketId) {
+                io.to(memberSocketId).emit("room_updated");
+            }
+        });
+
         callback();
     });
 

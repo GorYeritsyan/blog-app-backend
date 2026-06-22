@@ -44,6 +44,20 @@ class RoomService {
         });
     }
 
+    // Get room members by roomId
+    async getRoomMembers(roomId: number) {
+        const room = await prisma.room.findUnique({
+            where: {
+                id: roomId,
+            },
+            include: {
+                members: true
+            }
+        });
+
+        return room?.members;
+    }
+
     async createRoom({ roomId, name, memberIds, currentUserId }) {
         const allIds = [...new Set([currentUserId, ...memberIds])];
 
