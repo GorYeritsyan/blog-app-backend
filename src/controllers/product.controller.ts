@@ -44,14 +44,15 @@ class ProductController {
 
         const { title, price } = value;
 
-        const updatedProduct = await productService.updateProduct({ title, price, productId: +id });
+        const updatedProduct = await productService.updateProduct({ title, price, productId: +id, currentUserId: req.userId! });
 
         res.status(200).json({ success: true, data: updatedProduct });
     }
 
     async deleteProduct(req: AuthRequest<{ id: string }>, res: Response) {
         const { id } = req.params;
-        const deletedProduct = await productService.deleteProduct(+id);
+
+        const deletedProduct = await productService.deleteProduct({ productId: +id, currentUserId: req.userId! });
 
         res.status(200).json({ success: true, data: deletedProduct });
     }

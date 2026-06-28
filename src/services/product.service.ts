@@ -1,5 +1,5 @@
 import { prisma } from "../lib/prisma.js";
-import { NotFoundError } from "../errors/index.js";
+import {ForbiddenError, NotFoundError} from "../errors/index.js";
 import {Prisma} from "../generated/prisma/client.js";
 
 class ProductService {
@@ -70,7 +70,7 @@ class ProductService {
     }
 
     // Update product service
-    async updateProduct({ title, price, productId }: { title: string; price: number; productId: number }) {
+    async updateProduct({ title, price, productId, currentUserId }: { title: string; price: number; productId: number; currentUserId: number }) {
         const product = await prisma.product.findUnique({
             where: {
                 id: productId,
@@ -78,6 +78,9 @@ class ProductService {
         });
 
         if (!product) throw new NotFoundError(`Product with id ${productId} not found`);
+
+        // Check if product seller is current user
+        if (product.sellerId !== currentUserId) throw new ForbiddenError(`You don't have permission to update product with ID ${productId}`)
 
         return prisma.product.update({
             where: {
@@ -90,14 +93,18 @@ class ProductService {
         });
     }
 
-    async deleteProduct(productId: number) {
+    async deleteProduct({ productId , currentUserId }: { productId: number, currentUserId: number }) {
         const product = await prisma.product.findUnique({
             where: {
                 id: productId
             }
         });
 
+        // If product not found
         if (!product) throw new NotFoundError(`Product with id ${productId} not found`);
+
+        // Check if product seller is current user
+        if (product.sellerId !== currentUserId) throw new ForbiddenError(`You don't have permission to delete product with ID ${productId}`)
 
         return prisma.product.delete({
             where: {
