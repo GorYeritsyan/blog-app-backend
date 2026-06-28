@@ -5,6 +5,7 @@ import path from "path";
 import cors from "cors";
 import { fileURLToPath } from "url";
 
+import app from "./socket.js";
 import errorMiddleware from "./middlewares/error.middleware.js";
 
 // Import Routes
@@ -14,7 +15,7 @@ import usersRouter from "./routes/users.js";
 import friendsRouter from "./routes/friends.js";
 import messagesRouter from "./routes/messages.js";
 import roomsRouter from "./routes/rooms.js";
-import app from "./socket.js";
+import productsRouter from "./routes/products.js";
 
 // For .env.* files (process.env.ENV_VARIABLES)
 dotenv.config();
@@ -36,6 +37,7 @@ app.use("/api/users", usersRouter);
 app.use("/api/friends", friendsRouter);
 app.use("/api/messages", messagesRouter);
 app.use("/api/rooms", roomsRouter);
+app.use("/api/products", productsRouter);
 
 // Error middleware to handle all errors
 app.use(errorMiddleware);

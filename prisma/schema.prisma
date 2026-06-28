@@ -28,6 +28,8 @@ model User {
 
   members  Member[]
   messages Message[]
+  products Product[]
+  carts    Cart[]
 }
 
 model Post {
@@ -60,6 +62,12 @@ model FriendRequest {
   @@unique([senderId, receiverId])
 }
 
+enum FriendRequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
 model Room {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
@@ -69,6 +77,11 @@ model Room {
 
   members  Member[]
   messages Message[]
+}
+
+enum RoomType {
+  DM
+  GROUP
 }
 
 model Member {
@@ -98,13 +111,36 @@ model Message {
   updatedAt DateTime @updatedAt
 }
 
-enum RoomType {
-  DM
-  GROUP
+model Product {
+  id       Int    @id @default(autoincrement())
+  title    String
+  price    Int
+  currency String @default("usd")
+
+  seller   User @relation(fields: [sellerId], references: [id])
+  sellerId Int
+
+  cartItems CartItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-enum FriendRequestStatus {
-  PENDING
-  ACCEPTED
-  REJECTED
+model Cart {
+  id        Int        @id @default(autoincrement())
+  user      User       @relation(fields: [userId], references: [id])
+  userId    Int
+  items     CartItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model CartItem {
+  id        Int     @id @default(autoincrement())
+  cart      Cart    @relation(fields: [cartId], references: [id])
+  cartId    Int
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+
+  @@unique([cartId, productId])
 }
