@@ -1,5 +1,5 @@
 import { prisma } from "../lib/prisma.js";
-import { NotFoundError } from "../errors/index.js";
+import {ForbiddenError, NotFoundError} from "../errors/index.js";
 
 class CartService {
     async getCartItems(currentUserId: number) {
@@ -33,6 +33,8 @@ class CartService {
         });
 
         if (!product) throw new NotFoundError(`Product with ID ${productId} not found`);
+
+        if (product.sellerId === currentUserId) throw new ForbiddenError("You cannot add your own product to cart");
 
         return prisma.cartItem.upsert({
             where: {
