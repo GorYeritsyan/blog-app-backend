@@ -20,12 +20,28 @@ class CartController {
         res.status(201).json({ success: true, data: cartItem });
     }
 
-    async updateCartItem(req: AuthRequest, res: Response) {
+    async incrementCartItem(req: AuthRequest<{ productId: string }>, res: Response) {
         const { productId } = req.params;
-        const { quantity } = req.body;
 
-        cartService.updateCartItem({ userId: req.userId!, productId: +productId, quantity: quantity });
+        const incrementedCartItem = await cartService.updateCartItemQuantity({ currentUserId: req.userId!, productId: +productId, type: "increment" });
 
+        res.status(200).json({ success: true, data: incrementedCartItem });
+    }
+
+    async decrementCartItem(req: AuthRequest<{ productId: string }>, res: Response) {
+        const { productId } = req.params;
+
+        const decrementedCartItem = await cartService.updateCartItemQuantity({ currentUserId: req.userId!, productId: +productId, type: "decrement" });
+
+        res.status(200).json({ success: true, data: decrementedCartItem });
+    }
+
+    async removeCartItem(req: AuthRequest<{ productId: string }>, res: Response) {
+        const { productId } = req.params;
+
+        const removedCartItem = await cartService.removeCartItem({ currentUserId: req.userId!, productId: +productId });
+
+        res.status(200).json({ success: true, data: removedCartItem });
     }
 
     async clearCartItems(req: AuthRequest, res: Response) {
