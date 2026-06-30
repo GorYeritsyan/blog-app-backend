@@ -6,14 +6,14 @@ import auth from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
-router.get("/", productController.getAllProducts);
+router.get("/", auth, productController.getAllProducts);
 
-router.get("/:id", validateId, productController.getProductById);
+router.get("/:id", auth, validateId, productController.getProductById);
 
 router.post("/", auth, productController.createProduct);
 
-router.put("/:id", validateId, productController.updateProduct);
+router.put("/:id", auth, validateId, productController.updateProduct);
 
-router.delete("/:id", validateId, productController.deleteProduct);
+router.delete("/:id", auth, validateId, productController.deleteProduct);
 
 export default router;

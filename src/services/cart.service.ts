@@ -8,7 +8,11 @@ class CartService {
                 userId: currentUserId
             },
             include: {
-                items: true
+                items: {
+                    include: {
+                        product: true
+                    }
+                }
             }
         });
 
