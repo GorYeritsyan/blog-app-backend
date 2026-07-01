@@ -17,6 +17,7 @@ import messagesRouter from "./routes/messages.js";
 import roomsRouter from "./routes/rooms.js";
 import productsRouter from "./routes/products.js";
 import cartRouter from "./routes/cart.js";
+import checkoutRouter from "./routes/checkout.js";
 
 // For .env.* files (process.env.ENV_VARIABLES)
 dotenv.config();
@@ -39,8 +40,8 @@ app.use("/api/friends", friendsRouter);
 app.use("/api/messages", messagesRouter);
 app.use("/api/rooms", roomsRouter);
 app.use("/api/products", productsRouter);
-app.use("/api/cart", cartRouter)
-
+app.use("/api/cart", cartRouter);
+app.use("/api/checkout/session", checkoutRouter);
 // Error middleware to handle all errors
 app.use(errorMiddleware);
 
