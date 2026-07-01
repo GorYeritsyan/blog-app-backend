@@ -10,7 +10,7 @@ class CartService {
             include: {
                 items: {
                     include: {
-                        product: true
+                        product: true,
                     }
                 }
             }
