@@ -5,6 +5,7 @@ class CheckoutService {
     async createCheckoutSession(items: CartItem[]) {
         return await stripe.checkout.sessions.create({
             mode: "payment",
+            payment_method_types: ["card"],
             line_items: items.map(item => ({
                 price_data: {
                     currency: "usd",
@@ -16,8 +17,8 @@ class CheckoutService {
                 quantity: item.quantity,
             })),
 
-            success_url: `http://localhost:3000/products?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `http://localhost:3000/products?cancel=true`,
+            success_url: `http://localhost:3000/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `http://localhost:3000/checkout/cancel`,
         });
     }
 
