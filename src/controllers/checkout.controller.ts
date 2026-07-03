@@ -7,11 +7,12 @@ import { type CartItem } from "../generated/prisma/client.js";
 class CheckoutController {
     async createCheckoutSession(req: AuthRequest<{}, {}, { items: CartItem[] }>, res: Response) {
         const { items } = req.body;
+        const userId = req.userId;
 
-       const session = await checkoutService.createCheckoutSession(items);
-       console.log("Session", session);
+        const session = await checkoutService.createCheckoutSession(items, userId!);
+        console.log("Session", session);
 
-       res.json({ success: true, data: session });
+        res.json({ success: true, data: session });
     }
 
     async getCheckoutSession(req: AuthRequest<{ id: string }>, res: Response) {

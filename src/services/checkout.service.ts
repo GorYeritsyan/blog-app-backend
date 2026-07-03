@@ -2,7 +2,7 @@ import {CartItem} from "../generated/prisma/client.js";
 import {stripe} from "../lib/stripe.js";
 
 class CheckoutService {
-    async createCheckoutSession(items: CartItem[]) {
+    async createCheckoutSession(items: CartItem[], userId: number) {
         return await stripe.checkout.sessions.create({
             mode: "payment",
             payment_method_types: ["card"],
@@ -19,6 +19,9 @@ class CheckoutService {
 
             success_url: `http://localhost:3000/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `http://localhost:3000/checkout/cancel`,
+
+            // Additional metadata to get from session when retrieving data
+            metadata: { userId },
         });
     }
 

@@ -6,4 +6,5 @@ export const {
     ACCESS_TOKEN_SECRET,
     REFRESH_TOKEN_SECRET,
     STRIPE_SECRET_KEY,
+    STRIPE_WEBHOOK_SECRET,
 } = process.env;

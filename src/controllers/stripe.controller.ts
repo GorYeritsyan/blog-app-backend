@@ -1,0 +1,40 @@
+import { type Request, type Response } from "express";
+import stripeService from "../services/stripe.service.js";
+import cartService from "../services/cart.service.js";
+
+class StripeController {
+    async handleWebhookEvent(req: Request, res: Response) {
+        console.log("webhook req", req);
+        let event;
+
+        try {
+            event = stripeService.verifyWebhookSignature(req.body, req.headers["stripe-signature"]);
+        } catch (err) {
+            console.log("Webhook signature verification failed: ", err.message);
+            return res.sendStatus(400);
+        }
+
+        // Send to stripe
+        res.status(200).send();
+
+        // Handle event
+        try {
+            console.log("event", event);
+            switch (event.type) {
+                case 'checkout.session.completed':
+                    const session = event.data.object;
+                    if (session.payment_status === "paid") {
+                        await cartService.clearCartItems(+session.metadata.userId);
+                    }
+                    break;
+
+                default:
+                    console.log(`Unhandled event type: ${event.type}`);
+            }
+        } catch (err) {
+            console.error('Error processing webhook event:', err);
+        }
+    }
+}
+
+export default new StripeController();

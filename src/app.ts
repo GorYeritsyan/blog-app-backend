@@ -18,6 +18,7 @@ import roomsRouter from "./routes/rooms.js";
 import productsRouter from "./routes/products.js";
 import cartRouter from "./routes/cart.js";
 import checkoutRouter from "./routes/checkout.js";
+import stripeRouter from "./routes/stripe.js";
 
 // For .env.* files (process.env.ENV_VARIABLES)
 dotenv.config();
@@ -25,6 +26,8 @@ dotenv.config();
 // Exporting Global __filename and __dirname
 export const __filename = fileURLToPath(import.meta.url);
 export const __dirname = path.dirname(__filename);
+
+app.use("/api/webhook", stripeRouter);
 
 // Parse req.body
 app.use(express.json());
@@ -42,6 +45,7 @@ app.use("/api/rooms", roomsRouter);
 app.use("/api/products", productsRouter);
 app.use("/api/cart", cartRouter);
 app.use("/api/checkout/session", checkoutRouter);
+
 // Error middleware to handle all errors
 app.use(errorMiddleware);
 
