@@ -34,6 +34,7 @@ app.use(express.json());
 app.use(express.urlencoded());
 app.use(cors());
 app.use(cookieParser());
+app.use("/uploads", express.static(path.join(__dirname, "..", "uploads/products")));
 
 // Routes
 app.use("/api/blog", blogRouter);
@@ -48,5 +49,3 @@ app.use("/api/checkout/session", checkoutRouter);
 
 // Error middleware to handle all errors
 app.use(errorMiddleware);
-
-export default app;

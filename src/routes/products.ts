@@ -3,6 +3,7 @@ import { Router } from 'express';
 import productController from "../controllers/product.controller.js";
 import validateId from "../middlewares/validate-id.middleware.js";
 import auth from "../middlewares/auth.middleware.js";
+import upload from "../middlewares/upload.middleware.js";
 
 const router = Router();
 
@@ -10,9 +11,9 @@ router.get("/", auth, productController.getAllProducts);
 
 router.get("/:id", auth, validateId, productController.getProductById);
 
-router.post("/", auth, productController.createProduct);
+router.post("/", auth, upload.single("image"), productController.createProduct);
 
-router.put("/:id", auth, validateId, productController.updateProduct);
+router.put("/:id", auth, validateId, upload.single("image"), productController.updateProduct);
 
 router.delete("/:id", auth, validateId, productController.deleteProduct);
 
