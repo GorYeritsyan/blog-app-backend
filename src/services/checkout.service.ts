@@ -2,8 +2,9 @@ import {CartItem} from "../generated/prisma/client.js";
 import {stripe} from "../lib/stripe.js";
 
 class CheckoutService {
-    async createCheckoutSession(items: CartItem[], userId: number) {
+    async createCheckoutSession({ items, userId, customerId }: { items: CartItem[]; userId: number; customerId: string }) {
         return await stripe.checkout.sessions.create({
+            customer: customerId,
             mode: "payment",
             payment_method_types: ["card"],
             line_items: items.map(item => ({

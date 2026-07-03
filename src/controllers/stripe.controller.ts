@@ -4,7 +4,6 @@ import cartService from "../services/cart.service.js";
 
 class StripeController {
     async handleWebhookEvent(req: Request, res: Response) {
-        console.log("webhook req", req);
         let event;
 
         try {
@@ -19,7 +18,6 @@ class StripeController {
 
         // Handle event
         try {
-            console.log("event", event);
             switch (event.type) {
                 case 'checkout.session.completed':
                     const session = event.data.object;

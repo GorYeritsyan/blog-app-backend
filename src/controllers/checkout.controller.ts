@@ -1,16 +1,19 @@
 import { Response } from 'express';
+
 import { AuthRequest } from "../types/types.js";
 import checkoutService from "../services/checkout.service.js";
 import { type CartItem } from "../generated/prisma/client.js";
-
+import customerService from "../services/customer.service.js";
 
 class CheckoutController {
     async createCheckoutSession(req: AuthRequest<{}, {}, { items: CartItem[] }>, res: Response) {
         const { items } = req.body;
         const userId = req.userId;
 
-        const session = await checkoutService.createCheckoutSession(items, userId!);
-        console.log("Session", session);
+        // Create customer or get customer if already created
+        const customerId = await customerService.upsertStripeCustomer(userId!);
+
+        const session = await checkoutService.createCheckoutSession({ items, userId: userId!, customerId });
 
         res.json({ success: true, data: session });
     }
