@@ -1,8 +1,17 @@
+import fs from "fs/promises";
+import path from "path";
+
 import { prisma } from "../lib/prisma.js";
 import {ForbiddenError, NotFoundError} from "../errors/index.js";
 import {Prisma} from "../generated/prisma/client.js";
+import {__dirname} from "../app.js";
 
 class ProductService {
+    private async removeProductImage(image: string) {
+        const oldImagePath = path.join(__dirname, "..", `uploads/products/` + path.basename(image));
+        await fs.unlink(oldImagePath);
+    }
+
     async getAllProducts({ query, page, limit, orderBy, order }: { query: string; page: string; limit: string; orderBy: string; order: "asc" | "desc" }) {
         const skip = (+page - 1) * +limit;
 
@@ -48,7 +57,7 @@ class ProductService {
     }
 
     // Create product service
-    async createProduct({ title, price, sellerId }: { title: string; price: number; sellerId: number }) {
+    async createProduct({ title, price, image, sellerId }: { title: string; price: number; image?: string; sellerId: number }) {
         const user = await prisma.user.findUnique({
             where: {
                 id: sellerId
@@ -57,10 +66,11 @@ class ProductService {
 
         if (!user) throw new NotFoundError(`User with id ${sellerId} not found`);
 
-       return prisma.product.create({
+        return prisma.product.create({
             data: {
                 title,
                 price,
+                image,
                 sellerId
             },
            include: {
@@ -70,7 +80,7 @@ class ProductService {
     }
 
     // Update product service
-    async updateProduct({ title, price, productId, currentUserId }: { title: string; price: number; productId: number; currentUserId: number }) {
+    async updateProduct({ title, price, productId, image, currentUserId }: { title: string; price: number; image?: string; productId: number; currentUserId: number }) {
         const product = await prisma.product.findUnique({
             where: {
                 id: productId,
@@ -82,6 +92,10 @@ class ProductService {
         // Check if product seller is current user
         if (product.sellerId !== currentUserId) throw new ForbiddenError(`You don't have permission to update product with ID ${productId}`)
 
+        if (product?.image) {
+            await this.removeProductImage(product.image);
+        }
+
         return prisma.product.update({
             where: {
                 id: productId
@@ -89,6 +103,7 @@ class ProductService {
             data: {
                 title,
                 price,
+                image
             }
         });
     }
@@ -105,6 +120,10 @@ class ProductService {
 
         // Check if product seller is current user
         if (product.sellerId !== currentUserId) throw new ForbiddenError(`You don't have permission to delete product with ID ${productId}`)
+
+        if (product?.image) {
+            await this.removeProductImage(product.image);
+        }
 
         return prisma.product.delete({
             where: {

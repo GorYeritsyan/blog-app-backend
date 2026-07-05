@@ -112,10 +112,11 @@ model Message {
 }
 
 model Product {
-  id       Int    @id @default(autoincrement())
+  id       Int     @id @default(autoincrement())
   title    String
   price    Int
-  currency String @default("usd")
+  image    String?
+  currency String  @default("usd")
 
   seller   User @relation(fields: [sellerId], references: [id])
   sellerId Int

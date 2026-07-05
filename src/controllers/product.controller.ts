@@ -25,14 +25,14 @@ class ProductController {
 
     async createProduct(req: AuthRequest, res: Response) {
         const currentUserId = req.userId;
-        console.log("File", req.file);
 
+        // todo: validate file
         const { error, value } = productSchema.validate(req.body);
         if (error) throw new BadRequestError(error.message);
 
         const { title, price } = value;
 
-        const createdProduct = await productService.createProduct({ title, price: Number(price), sellerId: currentUserId! });
+        const createdProduct = await productService.createProduct({ title, price: Number(price), image: req.file?.filename, sellerId: currentUserId! });
 
         res.status(201).json({ success: true, data: createdProduct });
     }
@@ -40,12 +40,13 @@ class ProductController {
     async updateProduct(req: AuthRequest<{ id: string }>, res: Response) {
         const { id } = req.params;
 
+        // todo: validate req.file
         const { error, value } = productSchema.validate(req.body);
         if (error) throw new BadRequestError(error.message);
 
         const { title, price } = value;
 
-        const updatedProduct = await productService.updateProduct({ title, price: Number(price), productId: +id, currentUserId: req.userId! });
+        const updatedProduct = await productService.updateProduct({ title, price: Number(price), image: req.file?.filename, productId: +id, currentUserId: req.userId! });
 
         res.status(200).json({ success: true, data: updatedProduct });
     }
