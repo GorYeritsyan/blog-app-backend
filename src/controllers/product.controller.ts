@@ -26,7 +26,6 @@ class ProductController {
     async createProduct(req: AuthRequest, res: Response) {
         const currentUserId = req.userId;
 
-        // todo: validate file
         const { error, value } = productSchema.validate(req.body);
         if (error) throw new BadRequestError(error.message);
 
@@ -40,7 +39,6 @@ class ProductController {
     async updateProduct(req: AuthRequest<{ id: string }>, res: Response) {
         const { id } = req.params;
 
-        // todo: validate req.file
         const { error, value } = productSchema.validate(req.body);
         if (error) throw new BadRequestError(error.message);
 

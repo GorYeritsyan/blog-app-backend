@@ -92,9 +92,11 @@ class ProductService {
         // Check if product seller is current user
         if (product.sellerId !== currentUserId) throw new ForbiddenError(`You don't have permission to update product with ID ${productId}`)
 
-        if (product?.image) {
+        if (image && product?.image) {
             await this.removeProductImage(product.image);
         }
+
+        const productImagePath = image ? image : product.image;
 
         return prisma.product.update({
             where: {
@@ -103,7 +105,7 @@ class ProductService {
             data: {
                 title,
                 price,
-                image
+                image: productImagePath,
             }
         });
     }
