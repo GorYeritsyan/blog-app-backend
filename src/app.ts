@@ -11,7 +11,7 @@ import errorMiddleware from "./middlewares/error.middleware.js";
 // Import Routes
 import authRouter from "./routes/auth.js";
 import stripeRouter from "./routes/stripe.js";
-import authenticatedRouter from "./routes/authenticatedRouter.js";
+import authenticatedRouter from "./routes/authenticated.js";
 import auth from "./middlewares/auth.middleware.js";
 
 // For .env.* files (process.env.ENV_VARIABLES)
