@@ -6,18 +6,18 @@ import validateId from "../middlewares/validate-id.middleware.js";
 const router = Router();
 
 // Get All blog posts - GET /api/blog
-router.get("/", auth, blogController.getBlogPosts);
+router.get("/", blogController.getBlogPosts);
 
 // Get blog post by id - GET /api/blog/:id
-router.get("/:id", auth, validateId, blogController.getBlogPostById);
+router.get("/:id", validateId, blogController.getBlogPostById);
 
 // Create new blog post - POST /api/blog
-router.post("/", auth, blogController.createBlogPost);
+router.post("/", blogController.createBlogPost);
 
 // Update blog post - PATCH /api/blog/:id
-router.patch("/:id", auth, validateId, blogController.updateBlogPost);
+router.patch("/:id", validateId, blogController.updateBlogPost);
 
 // Delete blog post - DELETE /api/blog/:id
-router.delete("/:id", auth, validateId, blogController.deleteBlogPost);
+router.delete("/:id", validateId, blogController.deleteBlogPost);
 
 export default router;

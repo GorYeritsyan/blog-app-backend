@@ -1,7 +1,5 @@
 import { AppError } from "./app.error.js";
 
-// Custom errors
-
 // Not found error
 export class NotFoundError extends AppError {
     constructor(message = "Not Found") {

@@ -1,5 +1,6 @@
-import {CartItem} from "../generated/prisma/client.js";
-import {stripe} from "../lib/stripe.js";
+import { stripe } from "../lib/stripe.js";
+import { CartItem } from "../types/types.js";
+
 
 class CheckoutService {
     async createCheckoutSession({ items, userId, customerId }: { items: CartItem[]; userId: number; customerId: string }) {

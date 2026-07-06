@@ -1,8 +1,9 @@
 import express from "express";
 import { Server } from "socket.io";
 import { createServer } from "http";
-import { UnauthorizedError } from "./errors/index.js";
 import { JwtPayload } from "jsonwebtoken";
+
+import { UnauthorizedError } from "./errors/index.js";
 import tokenService from "./services/token.service.js";
 import messageService from "./services/message.service.js";
 import roomService from "./services/room.service.js";

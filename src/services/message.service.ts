@@ -50,7 +50,6 @@ class MessageService {
             throw new BadRequestError("You can't send messages in this conversation.");
         }
 
-        // todo: check if receiver is current user friend
         const [sentMessage] = await prisma.$transaction([
             prisma.message.create({
                 data: { senderId: currentUserId, roomId, content },

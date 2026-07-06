@@ -1,5 +1,5 @@
 import { prisma } from "../lib/prisma.js";
-import {PaginatedQuery} from "../types/types.js";
+import { PaginatedQuery } from "../types/types.js";
 
 class UserService {
     async getAllUsers({ query, page, limit, orderBy, order, authorId }: Required<PaginatedQuery> & { authorId: number }) {

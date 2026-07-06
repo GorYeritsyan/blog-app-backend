@@ -1,23 +1,22 @@
 import { Router } from "express";
 import roomController from "../controllers/room.controller.js";
-import auth from "../middlewares/auth.middleware.js";
 import validateId from "../middlewares/validate-id.middleware.js";
 
 const router = Router();
 
 // Get current user all rooms
-router.get("/", auth, roomController.getAllRooms);
+router.get("/", roomController.getAllRooms);
 
-router.get("/:id", auth, validateId, roomController.getRoomById);
+router.get("/:id", validateId, roomController.getRoomById);
 
-router.post("/", auth, roomController.createRoom);
+router.post("/", roomController.createRoom);
 
-router.patch("/:id", auth, validateId, roomController.updateRoom);
+router.patch("/:id", validateId, roomController.updateRoom);
 
 // Remove room by id
-router.delete("/:id", auth, validateId, roomController.removeRoom);
+router.delete("/:id", validateId, roomController.removeRoom);
 
 // Leave room by room id
-router.delete("/:id/leave", auth, validateId, roomController.leaveRoom);
+router.delete("/:id/leave", validateId, roomController.leaveRoom);
 
 export default router;

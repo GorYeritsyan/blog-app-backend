@@ -9,16 +9,10 @@ import app from "./socket.js";
 import errorMiddleware from "./middlewares/error.middleware.js";
 
 // Import Routes
-import blogRouter from "./routes/blog.js";
 import authRouter from "./routes/auth.js";
-import usersRouter from "./routes/users.js";
-import friendsRouter from "./routes/friends.js";
-import messagesRouter from "./routes/messages.js";
-import roomsRouter from "./routes/rooms.js";
-import productsRouter from "./routes/products.js";
-import cartRouter from "./routes/cart.js";
-import checkoutRouter from "./routes/checkout.js";
 import stripeRouter from "./routes/stripe.js";
+import authenticatedRouter from "./routes/authenticatedRouter.js";
+import auth from "./middlewares/auth.middleware.js";
 
 // For .env.* files (process.env.ENV_VARIABLES)
 dotenv.config();
@@ -36,16 +30,8 @@ app.use(cors());
 app.use(cookieParser());
 app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));
 
-// Routes
-app.use("/api/blog", blogRouter);
+app.use("/api/authenticated", auth, authenticatedRouter);
 app.use("/api/auth", authRouter);
-app.use("/api/users", usersRouter);
-app.use("/api/friends", friendsRouter);
-app.use("/api/messages", messagesRouter);
-app.use("/api/rooms", roomsRouter);
-app.use("/api/products", productsRouter);
-app.use("/api/cart", cartRouter);
-app.use("/api/checkout/session", checkoutRouter);
 
 // Error middleware to handle all errors
 app.use(errorMiddleware);

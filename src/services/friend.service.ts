@@ -23,8 +23,8 @@ class FriendService {
             },
         });
 
-        const friends = acceptedFriendRequests.map(req => req.senderId === userId ? req.receiver : req.sender );
-        return friends;
+        // Return All Friends
+        return acceptedFriendRequests.map(req => req.senderId === userId ? req.receiver : req.sender );
     }
 
     // Get all incoming requests that need to be accepted or rejected
@@ -76,43 +76,13 @@ class FriendService {
 
         // If someone send request to me, and I'm sending too, automatically accept it
         if (existingRequest.receiverId === senderId && existingRequest.status === "PENDING") {
-            // return prisma.friendRequest.update({
-            //     where: {
-            //         id: existingRequest.id
-            //     },
-            //     data: {
-            //         status: "ACCEPTED"
-            //     }
-            // })
-
             return await this.acceptFriendRequest(existingRequest.id!);
         }
 
         return existingRequest;
-        // If status rejected then send friend request again
-       //  return prisma.friendRequest.upsert({
-       //     where: {
-       //         senderId_receiverId: {
-       //             senderId,
-       //             receiverId,
-       //         },
-       //         status: "REJECTED"
-       //     },
-       //     update: {
-       //         status: "PENDING"
-       //     },
-       //     create: { senderId, receiverId }
-       // });
     }
 
     // Accept friend request
-    // async acceptFriendRequest(requestId: number) {
-    //     return prisma.friendRequest.update({
-    //         where: { id: requestId },
-    //         data: { status: "ACCEPTED" }
-    //     });
-    // }
-
     async acceptFriendRequest(requestId: number) {
         const acceptedFriendRequest = await prisma.friendRequest.findUnique({
             where: {

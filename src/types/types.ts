@@ -89,3 +89,41 @@ export type AuthRequest<
 
 // Friends types
 export type FriendRequestStatus = "PENDING" | "ACCEPTED" | "REJECTED";
+
+export type Room = {
+    roomId: number;
+    name: string;
+    memberIds: number[];
+    currentUserId: number
+}
+
+export type Product = {
+    id: number;
+    title: string;
+    price: number;
+    image?: string;
+    currency: string;
+    seller?: User;
+    sellerId: number;
+    cartItems: CartItem[];
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+export type Cart = {
+    id: number;
+    user?: User;
+    userId: number;
+    items: CartItem[];
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+export type CartItem = {
+    id: number;
+    cart?: Cart;
+    cartId: number;
+    productId: number;
+    product: Product;
+    quantity: number;
+}

@@ -2,9 +2,8 @@ import { type Response } from "express";
 
 import { type AuthRequest } from "../types/types.js";
 import roomService from "../services/room.service.js";
-import {groupChatSchema} from "../validations/index.js";
-import {BadRequestError, ForbiddenError, NotFoundError} from "../errors/index.js";
-import userService from "../services/user.service.js";
+import { groupChatSchema } from "../validations/index.js";
+import { BadRequestError, ForbiddenError, NotFoundError } from "../errors/index.js";
 import friendService from "../services/friend.service.js";
 
 class RoomController {
@@ -44,7 +43,7 @@ class RoomController {
         const { name, memberIds } = value;
 
         const friends = (await friendService.getFriends(currentUserId!)).map(friend => friend.id);
-        const userIds = memberIds.filter(id => !friends.includes(id));
+        const userIds = memberIds.filter((id: number) => !friends.includes(id));
 
         if (userIds.length > 0) {
             throw new BadRequestError(`One or more selected members couldn't be added. Make sure everyone is in your friends list first.`)

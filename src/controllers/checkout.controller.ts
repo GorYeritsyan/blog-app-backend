@@ -1,8 +1,7 @@
 import { Response } from 'express';
 
-import { AuthRequest } from "../types/types.js";
+import {AuthRequest, CartItem} from "../types/types.js";
 import checkoutService from "../services/checkout.service.js";
-import { type CartItem } from "../generated/prisma/client.js";
 import customerService from "../services/customer.service.js";
 
 class CheckoutController {

@@ -5,6 +5,7 @@ import authService from "../services/auth.service.js"
 import { loginSchema, registerSchema } from "../validations/index.js";
 import { AuthRequest, LoginBody, RegisterBody } from "../types/types.js";
 import tokenService from "../services/token.service.js";
+import { BadRequestError } from "../errors/index.js";
 
 class AuthController {
     async getMe(req: AuthRequest, res: Response) {
@@ -13,8 +14,10 @@ class AuthController {
     }
 
     async login(req: Request<{}, {}, LoginBody>, res: Response) {
-        const validLoginBody = await loginSchema.validateAsync(req.body);
-        const { user, accessToken, refreshToken } = await authService.login(validLoginBody);
+        const { error, value } = loginSchema.validate(req.body);
+        if (error) throw new BadRequestError("Invalid Credentials");
+
+        const { user, accessToken, refreshToken } = await authService.login(value);
 
         // Set refresh token in the cookies
         res.cookie("refreshToken", refreshToken, { httpOnly: true, sameSite: "none", maxAge: 7 * 24 * 60 * 60 * 1000 });
@@ -24,9 +27,10 @@ class AuthController {
     }
 
     async register(req: Request<{}, {}, RegisterBody>, res: Response) {
-        const validRegisterBody = await registerSchema.validateAsync(req.body);
+        const { error, value } = registerSchema.validate(req.body);
+        if (error) throw new BadRequestError("Invalid Credentials");
 
-        const newUser = await authService.register(validRegisterBody);
+        const newUser = await authService.register(value);
 
         res.status(201).json({ success: true, message: "You have successfully registered", data: newUser });
     }

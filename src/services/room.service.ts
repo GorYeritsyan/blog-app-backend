@@ -1,5 +1,6 @@
 import { prisma } from "../lib/prisma.js";
-import {BadRequestError, NotFoundError} from "../errors/index.js";
+import { BadRequestError } from "../errors/index.js";
+import {Room} from "../types/types.js";
 
 class RoomService {
     async getAllRooms(userId: number) {
@@ -58,7 +59,7 @@ class RoomService {
         return room?.members;
     }
 
-    async createRoom({ roomId, name, memberIds, currentUserId }) {
+    async createRoom({ name, memberIds, currentUserId }: Omit<Room, "roomId">) {
         const allIds = [...new Set([currentUserId, ...memberIds])];
 
         const users = await prisma.user.findMany({
@@ -91,7 +92,7 @@ class RoomService {
         });
     }
 
-    async updateRoom({ roomId, name, memberIds, currentUserId }) {
+    async updateRoom({ roomId, name, memberIds, currentUserId }: Room) {
         const existingRoom = await prisma.room.findUnique({
             where: { id: roomId },
             include: { members: true }

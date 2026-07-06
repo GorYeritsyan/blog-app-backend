@@ -7,8 +7,8 @@ class StripeController {
         let event;
 
         try {
-            event = stripeService.verifyWebhookSignature(req.body, req.headers["stripe-signature"]);
-        } catch (err) {
+            event = stripeService.verifyWebhookSignature(req.body, req.headers["stripe-signature"] as string);
+        } catch (err: any) {
             console.log("Webhook signature verification failed: ", err.message);
             return res.sendStatus(400);
         }
@@ -21,7 +21,7 @@ class StripeController {
             switch (event.type) {
                 case 'checkout.session.completed':
                     const session = event.data.object;
-                    if (session.payment_status === "paid") {
+                    if (session.payment_status === "paid" && session.metadata) {
                         await cartService.clearCartItems(+session.metadata.userId);
                     }
                     break;
