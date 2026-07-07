@@ -1,9 +1,9 @@
-import { AppError } from "../errors/index.js";
 import { NextFunction, Request, Response } from "express";
+import { AppError } from "../errors/index.js";
 
 const errorMiddleware = (err: Error, _req: Request, res: Response, _next: NextFunction) => {
     if (err instanceof AppError) {
-        res.status(err.statusCode).json({ success: false, error: err.message });
+        res.status(err.statusCode).json({ success: false, error: err.message, ...(err.details && { details: err.details }) });
         return;
     }
 

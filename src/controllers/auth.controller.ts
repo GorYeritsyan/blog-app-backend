@@ -6,6 +6,7 @@ import { loginSchema, registerSchema } from "../validations/index.js";
 import { AuthRequest, LoginBody, RegisterBody } from "../types/types.js";
 import tokenService from "../services/token.service.js";
 import { BadRequestError } from "../errors/index.js";
+import {ValidationError} from "../errors/validation.error.js";
 
 class AuthController {
     async getMe(req: AuthRequest, res: Response) {
@@ -15,7 +16,7 @@ class AuthController {
 
     async login(req: Request<{}, {}, LoginBody>, res: Response) {
         const { error, value } = loginSchema.validate(req.body);
-        if (error) throw new BadRequestError("Invalid Credentials");
+        if (error) throw new ValidationError("Invalid Credentials", error.details);
 
         const { user, accessToken, refreshToken } = await authService.login(value);
 
@@ -28,7 +29,7 @@ class AuthController {
 
     async register(req: Request<{}, {}, RegisterBody>, res: Response) {
         const { error, value } = registerSchema.validate(req.body);
-        if (error) throw new BadRequestError("Invalid Credentials");
+        if (error) throw new ValidationError("Invalid Credentials", error.details);
 
         const newUser = await authService.register(value);
 
