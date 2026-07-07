@@ -5,10 +5,13 @@ class CartService {
     async getCartItems(currentUserId: number) {
         const cartItems = await prisma.cart.findUnique({
             where: {
-                userId: currentUserId
+                userId: currentUserId,
             },
             include: {
                 items: {
+                    orderBy: {
+                        createdAt: "desc"
+                    },
                     include: {
                         product: true,
                     }

@@ -11,7 +11,7 @@ import errorMiddleware from "./middlewares/error.middleware.js";
 // Import Routes
 import authRouter from "./routes/auth.js";
 import stripeRouter from "./routes/stripe.js";
-import authenticatedRouter from "./routes/authenticated.js";
+import apiRouter from "./routes/api.js";
 import auth from "./middlewares/auth.middleware.js";
 
 // For .env.* files (process.env.ENV_VARIABLES)
@@ -30,8 +30,8 @@ app.use(cors());
 app.use(cookieParser());
 app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));
 
-app.use("/api/authenticated", auth, authenticatedRouter);
 app.use("/api/auth", authRouter);
+app.use("/api", auth, apiRouter);
 
 // Error middleware to handle all errors
 app.use(errorMiddleware);
