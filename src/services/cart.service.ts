@@ -58,7 +58,7 @@ class CartService {
         });
     }
 
-    async updateCartItemQuantity({ currentUserId, productId, type }: { currentUserId: number; productId: number; type: "increment" | "decrement" }) {
+    async updateCartItemQuantity({ currentUserId, productId, quantity }: { currentUserId: number; productId: number; quantity: number }) {
         const cart = await prisma.cart.findUnique({
             where: {
                 userId: currentUserId,
@@ -78,7 +78,7 @@ class CartService {
 
         if (!cartItem) throw new NotFoundError(`Cart item with productId ${productId} not found`);
 
-        if (type === "decrement" && cartItem.quantity <= 1) {
+        if (quantity < 1) {
             return prisma.cartItem.delete({
                 where: { cartId_productId: { cartId: cart.id, productId } }
             });
@@ -92,7 +92,7 @@ class CartService {
                 }
             },
             data: {
-                quantity: { [type]: 1 }
+                quantity
             }
         });
     }

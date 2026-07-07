@@ -62,13 +62,15 @@ class FriendService {
         }
 
         // If my request rejected, send again (update rejected to pending)
-        if (existingRequest.senderId === senderId && existingRequest.status === "REJECTED") {
+        if ((existingRequest.senderId === senderId || existingRequest.receiverId === senderId) && existingRequest.status === "REJECTED") {
             return prisma.friendRequest.update({
                 where: {
                     id: existingRequest.id
                 },
 
                 data: {
+                    senderId,
+                    receiverId,
                     status: "PENDING"
                 }
             })
