@@ -4,6 +4,7 @@ import { createBlogPostSchema, updateBlogPostSchema } from "../validations/index
 import blogService from "../services/blog.service.js";
 import type { ApiResponse, AuthRequest, BlogPost, BlogPostBody, PaginatedQuery, Pagination } from "../types/types.js";
 import {AppError, BadRequestError, ForbiddenError, NotFoundError} from "../errors/index.js";
+import {ValidationError} from "../errors/validation.error.js";
 
 class BlogController {
     // Get all paginated blog posts controller
@@ -31,9 +32,10 @@ class BlogController {
     async createBlogPost(req: AuthRequest<{}, {}, BlogPostBody>, res: Response<ApiResponse<BlogPost>>) {
         // Validate request body
         const { error, value: validBody } = createBlogPostSchema.validate(req.body);
-        if (error) throw new BadRequestError("Invalid request body");
-
-        // const validBody = await createBlogPostSchema.validateAsync(req.body);
+        if (error) throw new ValidationError({
+            message: error.message,
+            key: error.details[0].path[0] as string,
+        });
 
         const authorId = req.userId;
 
@@ -50,7 +52,10 @@ class BlogController {
 
         // Validate request body
         const { error, value: validBody } = updateBlogPostSchema.validate(req.body);
-        if (error) throw new BadRequestError("Invalid request body");
+        if (error) throw new ValidationError({
+            message: error.message,
+            key: error.details[0].path[0] as string,
+        });
 
         // Get blog post by ID
         const blogPost = await blogService.getBlogPostById(+id);

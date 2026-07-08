@@ -5,7 +5,6 @@ import authService from "../services/auth.service.js"
 import { loginSchema, registerSchema } from "../validations/index.js";
 import { AuthRequest, LoginBody, RegisterBody } from "../types/types.js";
 import tokenService from "../services/token.service.js";
-import { BadRequestError } from "../errors/index.js";
 import {ValidationError} from "../errors/validation.error.js";
 
 class AuthController {

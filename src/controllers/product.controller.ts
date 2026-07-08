@@ -4,6 +4,7 @@ import productService from "../services/product.service.js";
 import { type AuthRequest, type Pagination } from "../types/types.js";
 import { BadRequestError } from "../errors/index.js";
 import { productSchema } from "../validations/index.js";
+import {ValidationError} from "../errors/validation.error.js";
 
 class ProductController {
     async getAllProducts(req: AuthRequest<{}, {}, {}, { query: string; page: string; limit: string; orderBy: string; order: "asc" | "desc" }>, res: Response) {
@@ -27,7 +28,11 @@ class ProductController {
         const currentUserId = req.userId;
 
         const { error, value } = productSchema.validate(req.body);
-        if (error) throw new BadRequestError(error.message);
+        // if (error) throw new BadRequestError(error.message);
+        if (error) throw new ValidationError({
+            message: error.message,
+            key: error.details[0].path[0] as string,
+        });
 
         const { title, price } = value;
 
@@ -40,7 +45,11 @@ class ProductController {
         const { id } = req.params;
 
         const { error, value } = productSchema.validate(req.body);
-        if (error) throw new BadRequestError(error.message);
+        // if (error) throw new BadRequestError(error.message);
+        if (error) throw new ValidationError({
+            message: error.message,
+            key: error.details[0].path[0] as string,
+        });
 
         const { title, price } = value;
 
