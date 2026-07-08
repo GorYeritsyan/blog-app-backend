@@ -16,7 +16,10 @@ class AuthController {
 
     async login(req: Request<{}, {}, LoginBody>, res: Response) {
         const { error, value } = loginSchema.validate(req.body);
-        if (error) throw new ValidationError("Invalid Credentials", error.details);
+        if (error) throw new ValidationError({
+            message: error.message,
+            key: error.details[0].path[0] as string
+        });
 
         const { user, accessToken, refreshToken } = await authService.login(value);
 
@@ -29,7 +32,10 @@ class AuthController {
 
     async register(req: Request<{}, {}, RegisterBody>, res: Response) {
         const { error, value } = registerSchema.validate(req.body);
-        if (error) throw new ValidationError("Invalid Credentials", error.details);
+        if (error) throw new ValidationError({
+            message: error.message,
+            key: error.details[0].path[0] as string
+        });
 
         const newUser = await authService.register(value);
 

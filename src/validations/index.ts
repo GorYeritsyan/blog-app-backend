@@ -4,53 +4,47 @@ import type { LoginBody, RegisterBody, BlogPostBody } from "../types/types.js";
 // Blog post
 export const createBlogPostSchema = joi.object<BlogPostBody>({
     title: joi.string().min(3).max(255).required()
-        .label("Title")
         .messages({
-            'string.base': '{{#label}} must be text',
-            'string.empty': '{{#label}} cannot be empty',
-            'string.min': '{{#label}} must be at least {{#limit}} characters',
-            'string.max': '{{#label}} must be at most {{#limit}} characters',
-            'any.required': '{{#label}} is required',
+            'string.base': 'Title must be text',
+            'string.empty': 'Title cannot be empty',
+            'string.min': 'Title must be at least {{#limit}} characters',
+            'string.max': 'Title must be at most {{#limit}} characters',
+            'any.required': 'Title is required',
         }),
     content: joi.string().min(3).max(255).required()
-        .label('Content')
         .messages({
-            'string.base': '{{#label}} must be text',
-            'string.empty': '{{#label}} cannot be empty',
-            'string.min': '{{#label}} must be at least {{#limit}} characters',
-            'string.max': '{{#label}} must be at most {{#limit}} characters',
-            'any.required': '{{#label}} is required',
+            'string.base': 'Content must be text',
+            'string.empty': 'Content cannot be empty',
+            'string.min': 'Content must be at least {{#limit}} characters',
+            'string.max': 'Content must be at most {{#limit}} characters',
+            'any.required': 'Content is required',
         }),
     tags: joi.array().items(joi.string())
-        .label('Tags')
         .messages({
-            'array.base': '{{#label}} must be an array',
-            'array.includes': '{{#label}} can only contain text values',
+            'array.base': 'Tags must be an array',
+            'array.includes': 'Tags can only contain text values',
         }),
 });
 
 export const updateBlogPostSchema = joi.object<Partial<BlogPostBody>>({
     title: joi.string().min(3).max(255)
-        .label('Title')
         .messages({
-            'string.base': '{{#label}} must be text',
-            'string.empty': '{{#label}} cannot be empty',
-            'string.min': '{{#label}} must be at least {{#limit}} characters',
-            'string.max': '{{#label}} must be at most {{#limit}} characters',
+            'string.base': 'Title must be text',
+            'string.empty': 'Title cannot be empty',
+            'string.min': 'Title must be at least {{#limit}} characters',
+            'string.max': 'Title must be at most {{#limit}} characters',
         }),
     content: joi.string().min(3).max(255)
-        .label('Content')
         .messages({
-            'string.base': '{{#label}} must be text',
-            'string.empty': '{{#label}} cannot be empty',
-            'string.min': '{{#label}} must be at least {{#limit}} characters',
-            'string.max': '{{#label}} must be at most {{#limit}} characters',
+            'string.base': 'Content must be text',
+            'string.empty': 'Content cannot be empty',
+            'string.min': 'Content must be at least {{#limit}} characters',
+            'string.max': 'Content must be at most {{#limit}} characters',
         }),
     tags: joi.array().items(joi.string())
-        .label('Tags')
         .messages({
-            'array.base': '{{#label}} must be an array',
-            'array.includes': '{{#label}} can only contain text values',
+            'array.base': 'Tags must be an array',
+            'array.includes': 'Tags can only contain text values',
         }),
 });
 
@@ -58,48 +52,43 @@ export const updateBlogPostSchema = joi.object<Partial<BlogPostBody>>({
 // Login schema
 export const loginSchema = joi.object<LoginBody>({
     email: joi.string().email().required()
-        .label('Email')
         .messages({
-            'string.base': '{{#label}} must be text',
-            'string.empty': '{{#label}} cannot be empty',
-            'string.email': '{{#label}} must be a valid email address',
-            'any.required': '{{#label}} is required',
+            'string.base': 'Email must be text',
+            'string.empty': 'Email cannot be empty',
+            'string.email': 'Email must be a valid email address',
+            'any.required': 'Email is required',
         }),
     password: joi.string().pattern(/^[a-zA-Z0-9]{3,30}$/).required()
-        .label('Password')
         .messages({
-            'string.base': '{{#label}} must be text',
-            'string.empty': '{{#label}} cannot be empty',
-            'string.pattern.base': '{{#label}} must be 3-30 characters and contain only letters and numbers',
-            'any.required': '{{#label}} is required',
+            'string.base': 'Password must be text',
+            'string.empty': 'Password cannot be empty',
+            'string.pattern.base': 'Password must be 3-30 characters and contain only letters and numbers',
+            'any.required': 'Password is required',
         }),
 });
 
 export const registerSchema = joi.object<RegisterBody>({
     name: joi.string().min(3).max(255).required()
-        .label('Name')
         .messages({
-            'string.base': '{{#label}} must be text',
-            'string.empty': '{{#label}} cannot be empty',
-            'string.min': '{{#label}} must be at least {{#limit}} characters',
-            'string.max': '{{#label}} must be at most {{#limit}} characters',
-            'any.required': '{{#label}} is required',
+            'string.base': 'Name must be text',
+            'string.empty': 'Name cannot be empty',
+            'string.min': 'Name must be at least {{#limit}} characters',
+            'string.max': 'Name must be at most {{#limit}} characters',
+            'any.required': 'Name is required',
         }),
     email: joi.string().email().required()
-        .label('Email')
         .messages({
-            'string.base': '{{#label}} must be text',
-            'string.empty': '{{#label}} cannot be empty',
-            'string.email': '{{#label}} must be a valid email address',
-            'any.required': '{{#label}} is required',
+            'string.base': 'Email must be text',
+            'string.empty': 'Email cannot be empty',
+            'string.email': 'Email must be a valid email address',
+            'any.required': 'Email is required',
         }),
     password: joi.string().pattern(/^[a-zA-Z0-9]{3,30}$/).required()
-        .label('Password')
         .messages({
-            'string.base': '{{#label}} must be text',
-            'string.empty': '{{#label}} cannot be empty',
-            'string.pattern.base': '{{#label}} must be 3-30 characters and contain only letters and numbers',
-            'any.required': '{{#label}} is required',
+            'string.base': 'Password must be text',
+            'string.empty': 'Password cannot be empty',
+            'string.pattern.base': 'Password must be 3-30 characters and contain only letters and numbers',
+            'any.required': 'Password is required',
         }),
     confirmPassword: joi.ref("password"),
 });
@@ -107,39 +96,35 @@ export const registerSchema = joi.object<RegisterBody>({
 // Chat
 export const groupChatSchema = joi.object({
     name: joi.string().min(3).max(255).required()
-        .label('Name')
         .messages({
-            'string.base': '{{#label}} must be text',
-            'string.empty': '{{#label}} cannot be empty',
-            'string.min': '{{#label}} must be at least {{#limit}} characters',
-            'string.max': '{{#label}} must be at most {{#limit}} characters',
-            'any.required': '{{#label}} is required',
+            'string.base': 'Name must be text',
+            'string.empty': 'Name cannot be empty',
+            'string.min': 'Name must be at least {{#limit}} characters',
+            'string.max': 'Name must be at most {{#limit}} characters',
+            'any.required': 'Name is required',
         }),
     memberIds: joi.array().items(joi.number()).min(1).required()
-        .label('Member IDs')
         .messages({
-            'array.base': '{{#label}} must be an array',
-            'array.includes': '{{#label}} can only contain numbers',
-            'array.min': '{{#label}} must include at least {{#limit}} member',
-            'any.required': '{{#label}} is required',
+            'array.base': 'Member IDs must be an array',
+            'array.includes': 'Member IDs can only contain numbers',
+            'array.min': 'Member IDs must include at least {{#limit}} member',
+            'any.required': 'Member IDs is required',
         }),
 });
 
 // Product
 export const productSchema = joi.object({
     title: joi.string().min(3).max(255).required()
-        .label('Title')
         .messages({
-            'string.base': '{{#label}} must be text',
-            'string.empty': '{{#label}} cannot be empty',
-            'string.min': '{{#label}} must be at least {{#limit}} characters',
-            'string.max': '{{#label}} must be at most {{#limit}} characters',
-            'any.required': '{{#label}} is required',
+            'string.base': 'Title must be text',
+            'string.empty': 'Title cannot be empty',
+            'string.min': 'Title must be at least {{#limit}} characters',
+            'string.max': 'Title must be at most {{#limit}} characters',
+            'any.required': 'Title is required',
         }),
     price: joi.number().required()
-        .label('Price')
         .messages({
-            'number.base': '{{#label}} must be a number',
-            'any.required': '{{#label}} is required',
+            'number.base': 'Price must be a number',
+            'any.required': 'Price is required',
         }),
 });
