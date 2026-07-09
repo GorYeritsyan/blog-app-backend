@@ -1,14 +1,28 @@
 import Stripe from "stripe";
 import { prisma } from "../lib/prisma.js";
 import { NotFoundError } from "../errors/index.js";
+import { PaginatedQuery } from "../types/types.js";
 
 class OrderService {
     // Get all orders service
-    async getAllOrders(userId: number) {
-        return prisma.order.findMany({
-            where: {
-                userId
+    // TODO: query logic
+    async getAllOrders({ query, page, limit, orderBy, order, userId }: Required<PaginatedQuery> & { userId: number }) {
+        const skip = (+page - 1) * +limit;
+
+        const whereClause = {
+            userId
+        };
+
+        const orders = await prisma.order.findMany({
+            where: whereClause,
+
+            orderBy: {
+                [orderBy]: order
             },
+
+            // Pagination
+            take: +limit,
+            skip,
 
             include: {
                 items: {
@@ -18,6 +32,14 @@ class OrderService {
                 },
             },
         });
+
+        const totalOrdersCount = await prisma.order.count({
+            where: whereClause,
+        });
+
+        const totalPages = totalOrdersCount > 0 ? Math.ceil(totalOrdersCount / +limit) : 1;
+
+        return { orders, totalPages };
     }
 
     // Get order by id service
