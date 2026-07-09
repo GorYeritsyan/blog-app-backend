@@ -30,6 +30,7 @@ model User {
   messages Message[]
   products Product[]
   carts    Cart[]
+  orders   Order[]
 }
 
 model Post {
@@ -121,7 +122,8 @@ model Product {
   seller   User @relation(fields: [sellerId], references: [id])
   sellerId Int
 
-  cartItems CartItem[]
+  cartItems  CartItem[]
+  orderItems OrderItem[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -147,4 +149,33 @@ model CartItem {
   updatedAt DateTime @updatedAt
 
   @@unique([cartId, productId])
+}
+
+model Order {
+  id       Int    @id @default(autoincrement())
+  total    Int
+  currency String @default("usd")
+
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+
+  items OrderItem[]
+
+  stripeSessionId String? @unique
+
+  createdAt DateTime @default(now())
+}
+
+model OrderItem {
+  id       Int @id @default(autoincrement())
+  quantity Int @default(1)
+  price    Int // snapshot of Product.price at purchase time
+
+  order   Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId Int
+
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+
+  @@unique([orderId, productId])
 }

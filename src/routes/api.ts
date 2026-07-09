@@ -8,6 +8,7 @@ import roomsRouter from "./rooms.js";
 import productsRouter from "./products.js";
 import cartRouter from "./cart.js";
 import checkoutRouter from "./checkout.js";
+import ordersRouter from "./orders.js";
 
 const router = Router();
 
@@ -20,5 +21,6 @@ router.use("/rooms", roomsRouter);
 router.use("/products", productsRouter);
 router.use("/cart", cartRouter);
 router.use("/checkout/session", checkoutRouter);
+router.use("/orders", ordersRouter);
 
 export default router;

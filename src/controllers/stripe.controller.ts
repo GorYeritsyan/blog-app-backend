@@ -1,6 +1,7 @@
 import { type Request, type Response } from "express";
 import stripeService from "../services/stripe.service.js";
 import cartService from "../services/cart.service.js";
+import orderService from "../services/order.service.js";
 
 class StripeController {
     async handleWebhookEvent(req: Request, res: Response) {
@@ -19,10 +20,11 @@ class StripeController {
         // Handle event
         try {
             switch (event.type) {
-                case 'checkout.session.completed':
+                case "checkout.session.completed":
                     const session = event.data.object;
+
                     if (session.payment_status === "paid" && session.metadata) {
-                        await cartService.clearCartItems(+session.metadata.userId);
+                        await orderService.createOrder({ userId: +session.metadata.userId, session });
                     }
                     break;
 
@@ -30,7 +32,7 @@ class StripeController {
                     console.log(`Unhandled event type: ${event.type}`);
             }
         } catch (err) {
-            console.error('Error processing webhook event:', err);
+            console.error("Error processing webhook event:", err);
         }
     }
 }
