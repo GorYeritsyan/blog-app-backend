@@ -7,7 +7,11 @@ import upload from "../middlewares/upload.middleware.js";
 
 const router = Router();
 
+// get all products except current user created products
 router.get("/", productController.getAllProducts);
+
+// get current user products
+router.get("/me", productController.getMyProducts);
 
 router.get("/:id", validateId, productController.getProductById);
 

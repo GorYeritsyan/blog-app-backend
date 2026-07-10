@@ -9,7 +9,21 @@ import {ValidationError} from "../errors/validation.error.js";
 class ProductController {
     async getAllProducts(req: AuthRequest<{}, {}, {}, { query: string; page: string; limit: string; orderBy: string; order: "asc" | "desc" }>, res: Response) {
         const { query = "", page = "1", limit = "10", orderBy = "createdAt", order = "desc" } = req.query;
-        const { products, totalPages } = await productService.getAllProducts({ query, page, limit, orderBy, order });
+        const currentUserId = req.userId;
+
+        const { products, totalPages } = await productService.getAllProducts({ query, page, limit, orderBy, order, currentUserId: currentUserId! });
+
+        // Pagination
+        const pagination: Pagination = { currentPage: +page, totalPages, hasNext: +page < totalPages, hasPrev: +page > 1 };
+
+        res.json({ success: true, data: { items: products, pagination } });
+    }
+
+    async getMyProducts(req: AuthRequest<{}, {}, {}, { query: string; page: string; limit: string; orderBy: string; order: "asc" | "desc" }>, res: Response) {
+        const { query = "", page = "1", limit = "10", orderBy = "createdAt", order = "desc" } = req.query;
+        const currentUserId = req.userId;
+
+        const { products, totalPages } = await productService.getMyProducts({ query, page, limit, orderBy, order, currentUserId: currentUserId! });
 
         // Pagination
         const pagination: Pagination = { currentPage: +page, totalPages, hasNext: +page < totalPages, hasPrev: +page > 1 };

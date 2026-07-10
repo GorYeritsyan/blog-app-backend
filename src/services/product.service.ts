@@ -12,15 +12,11 @@ class ProductService {
         await fs.unlink(oldImagePath);
     }
 
-    async getAllProducts({ query, page, limit, orderBy, order }: { query: string; page: string; limit: string; orderBy: string; order: "asc" | "desc" }) {
+    async getProducts<T>({ query, page, limit, orderBy, order, currentUserId, where }: { query: string; page: string; limit: string; orderBy: string; order: "asc" | "desc", currentUserId: number; where: Prisma.ProductWhereInput }) {
         const skip = (+page - 1) * +limit;
 
-        const whereClause: Prisma.ProductWhereInput = {
-            ...(query && { title: { contains: query, mode: "insensitive" } }),
-        }
-
         const products = await prisma.product.findMany({
-            where: whereClause,
+            where,
 
             // Sort logic - { title: "asc" } || { content: "desc" } || etc...
             // Default - { createdAt: "desc" }
@@ -39,16 +35,40 @@ class ProductService {
         });
 
         const totalProductsCount = await prisma.product.count({
-            where: whereClause
+            where
         });
         const totalPages = totalProductsCount > 0 ? Math.ceil(totalProductsCount / +limit) : 1;
 
         return { products, totalPages };
     }
 
+    async getAllProducts({ query, page, limit, orderBy, order, currentUserId }: { query: string; page: string; limit: string; orderBy: string; order: "asc" | "desc", currentUserId: number }) {
+        const whereClause: Prisma.ProductWhereInput = {
+            ...(query && { title: { contains: query, mode: "insensitive" } }),
+            sellerId: { not: currentUserId },
+            isDeleted: false
+        }
+
+        const { products, totalPages } = await this.getProducts({ query, page, limit, orderBy, order, currentUserId, where: whereClause });
+
+        return { products, totalPages };
+    }
+
+    async getMyProducts({ query, page, limit, orderBy, order, currentUserId }: { query: string; page: string; limit: string; orderBy: string; order: "asc" | "desc", currentUserId: number }) {
+        const whereClause: Prisma.ProductWhereInput = {
+            ...(query && { title: { contains: query, mode: "insensitive" } }),
+            sellerId: currentUserId,
+            isDeleted: false
+        }
+
+        const { products, totalPages } = await this.getProducts({ query, page, limit, orderBy, order, currentUserId, where: whereClause });
+
+        return { products, totalPages };
+    }
+
     async getProductById(productId: number) {
         const product = await prisma.product.findUnique({
-            where: { id: productId },
+            where: { id: productId, isDeleted: false },
         });
 
         if (!product) throw new NotFoundError(`Product with id ${productId} not found`);
@@ -84,6 +104,7 @@ class ProductService {
         const product = await prisma.product.findUnique({
             where: {
                 id: productId,
+                isDeleted: false
             }
         });
 
@@ -113,7 +134,8 @@ class ProductService {
     async deleteProduct({ productId , currentUserId }: { productId: number, currentUserId: number }) {
         const product = await prisma.product.findUnique({
             where: {
-                id: productId
+                id: productId,
+                isDeleted: false
             }
         });
 
@@ -121,16 +143,15 @@ class ProductService {
         if (!product) throw new NotFoundError(`Product with id ${productId} not found`);
 
         // Check if product seller is current user
-        if (product.sellerId !== currentUserId) throw new ForbiddenError(`You don't have permission to delete product with ID ${productId}`)
+        if (product.sellerId !== currentUserId) throw new ForbiddenError(`You don't have permission to delete product with ID ${productId}`);
 
-        if (product?.image) {
-            await this.removeProductImage(product.image);
-        }
-
-        return prisma.product.delete({
+        return prisma.product.update({
             where: {
                 id: productId
-            }
+            },
+            data: {
+                isDeleted: true
+            },
         });
     }
 }
