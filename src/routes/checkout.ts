@@ -6,6 +6,8 @@ const router = Router();
 // POST - /api/checkout/session (create checkout session)
 router.post("/", checkoutController.createCheckoutSession);
 
+router.post("/subscription", checkoutController.createSubscriptionCheckoutSession);
+
 // GET - /api/checkout/session/:id (retrieve checkout session)
 router.get("/:id", checkoutController.getCheckoutSession);
 

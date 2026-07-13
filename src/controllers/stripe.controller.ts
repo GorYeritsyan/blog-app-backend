@@ -27,6 +27,12 @@ class StripeController {
                     }
                     break;
 
+                case "customer.subscription.created": {
+                    const session = event.data.object;
+                    console.log(session);
+                    break;
+                }
+
                 default:
                     console.log(`Unhandled event type: ${event.type}`);
             }

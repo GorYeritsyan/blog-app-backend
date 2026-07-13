@@ -26,11 +26,12 @@ model User {
   // Requests that received this user
   receivedFriendRequests FriendRequest[] @relation("ReceivedRequests")
 
-  members  Member[]
-  messages Message[]
-  products Product[]
-  carts    Cart[]
-  orders   Order[]
+  members       Member[]
+  messages      Message[]
+  products      Product[]
+  carts         Cart[]
+  orders        Order[]
+  subscriptions Subscription[]
 }
 
 model Post {
@@ -181,4 +182,39 @@ model OrderItem {
   productId Int
 
   @@unique([orderId, productId])
+}
+
+model Plan {
+  id              Int     @id @default(autoincrement())
+  name            String
+  slug            String  @unique
+  price           Int
+  currency        String  @default("usd")
+  stripeProductId String? @unique
+  stripePriceId   String? @unique
+  // isActive        Boolean  @default(true)
+
+  subscriptions Subscription[] // back-relation, no DB column — see previous answer
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Subscription {
+  id                   Int      @id @default(autoincrement())
+  stripeSubscriptionId String   @unique
+  status               String // active | trialing | past_due | canceled | unpaid | incomplete...
+  currentPeriodEnd     DateTime
+  cancelAtPeriodEnd    Boolean  @default(false)
+
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+
+  plan   Plan @relation(fields: [planId], references: [id])
+  planId Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
 }
