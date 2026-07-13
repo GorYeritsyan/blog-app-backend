@@ -113,12 +113,14 @@ model Message {
 }
 
 model Product {
-  id        Int     @id @default(autoincrement())
-  title     String
-  price     Int
-  image     String?
-  currency  String  @default("usd")
-  isDeleted Boolean @default(false)
+  id              Int     @id @default(autoincrement())
+  title           String
+  price           Int
+  image           String?
+  currency        String  @default("usd")
+  isDeleted       Boolean @default(false)
+  stripeProductId String? @unique
+  stripePriceId   String? @unique
 
   seller   User @relation(fields: [sellerId], references: [id])
   sellerId Int

@@ -1,6 +1,5 @@
 import { type Request, type Response } from "express";
 import stripeService from "../services/stripe.service.js";
-import cartService from "../services/cart.service.js";
 import orderService from "../services/order.service.js";
 
 class StripeController {

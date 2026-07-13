@@ -13,7 +13,8 @@ class CustomerService {
         if (!user) throw new NotFoundError(`User with ID ${userId} not found.`);
 
         if (user.stripeCustomerId) {
-            return user.stripeCustomerId;
+            const isValid = await this.isValidStripeCustomer(user.stripeCustomerId);
+            if (isValid) return user.stripeCustomerId;
         }
 
         const customer = await stripe.customers.create({
@@ -34,6 +35,13 @@ class CustomerService {
         });
 
         return customer.id;
+    }
+
+    async isValidStripeCustomer(customerId: string) {
+        const customer = await stripe.customers.retrieve(customerId);
+
+        console.log("stripe customer", customer);
+        return !customer.deleted;
     }
 }
 

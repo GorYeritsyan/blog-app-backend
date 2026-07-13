@@ -36,6 +36,7 @@ class CartService {
         const product = await prisma.product.findUnique({
             where: {
                 id: productId,
+                isDeleted: false
             }
         });
 

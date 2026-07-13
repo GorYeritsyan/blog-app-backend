@@ -5,6 +5,7 @@ import { prisma } from "../lib/prisma.js";
 import {ForbiddenError, NotFoundError} from "../errors/index.js";
 import {Prisma} from "../generated/prisma/client.js";
 import {__dirname} from "../app.js";
+import {stripe} from "../lib/stripe.js";
 
 class ProductService {
     private async removeProductImage(image: string) {
@@ -86,12 +87,24 @@ class ProductService {
 
         if (!user) throw new NotFoundError(`User with id ${sellerId} not found`);
 
+        const stripeProduct = await stripe.products.create({
+            name: title
+        });
+
+        const stripePrice = await stripe.prices.create({
+            product: stripeProduct.id,
+            unit_amount: price * 100,
+            currency: "usd",
+        });
+
         return prisma.product.create({
             data: {
                 title,
                 price,
                 image,
-                sellerId
+                sellerId,
+                stripeProductId: stripeProduct.id,
+                stripePriceId: stripePrice.id,
             },
            include: {
                 seller: true,
@@ -110,6 +123,21 @@ class ProductService {
 
         if (!product) throw new NotFoundError(`Product with id ${productId} not found`);
 
+        let newStripeProductId = product?.stripeProductId;
+        if (!product.stripeProductId && !product.stripePriceId) {
+            const stripeProduct = await stripe.products.create({
+                name: product.title
+            });
+
+            await stripe.prices.create({
+                product: stripeProduct.id,
+                unit_amount: product.price * 100,
+                currency: "usd",
+            });
+
+            newStripeProductId = stripeProduct.id;
+        }
+
         // Check if product seller is current user
         if (product.sellerId !== currentUserId) throw new ForbiddenError(`You don't have permission to update product with ID ${productId}`)
 
@@ -119,6 +147,26 @@ class ProductService {
 
         const productImagePath = image ? image : product.image;
 
+        const newStripeProduct = await stripe.products.update(product?.stripeProductId ? product.stripeProductId : newStripeProductId!, {
+            name: title,
+        });
+
+        let newStripePriceId = product.stripePriceId;
+
+        if (price !== product.price) {
+            if (product.stripePriceId) {
+                await stripe.prices.update(product.stripePriceId, { active: false });
+            }
+
+            const newPrice = await stripe.prices.create({
+                product: newStripeProduct.id,
+                unit_amount: price * 100,
+                currency: "usd",
+            });
+
+            newStripePriceId = newPrice.id;
+        }
+
         return prisma.product.update({
             where: {
                 id: productId
@@ -127,6 +175,8 @@ class ProductService {
                 title,
                 price,
                 image: productImagePath,
+                stripeProductId: newStripeProduct.id,
+                stripePriceId: newStripePriceId,
             }
         });
     }
@@ -144,6 +194,19 @@ class ProductService {
 
         // Check if product seller is current user
         if (product.sellerId !== currentUserId) throw new ForbiddenError(`You don't have permission to delete product with ID ${productId}`);
+
+        // If already deleted then return deleted product
+        if (product.isDeleted) return product;
+
+        // Archive stripe product
+        if (product.stripeProductId) {
+            await stripe.products.update(product.stripeProductId, { active: false });
+        }
+
+        // Archive stripe product price
+        if (product.stripePriceId) {
+            await stripe.prices.update(product.stripePriceId, { active: false });
+        }
 
         return prisma.product.update({
             where: {

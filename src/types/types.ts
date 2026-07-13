@@ -106,6 +106,8 @@ export type Product = {
     seller?: User;
     sellerId: number;
     cartItems: CartItem[];
+    stripeProductId?: string;
+    stripePriceId?: string;
     createdAt: Date;
     updatedAt: Date;
 }
