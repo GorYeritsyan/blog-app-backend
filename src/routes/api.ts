@@ -9,6 +9,7 @@ import productsRouter from "./products.js";
 import cartRouter from "./cart.js";
 import checkoutRouter from "./checkout.js";
 import ordersRouter from "./orders.js";
+import plansRouter from "./plans.js";
 
 const router = Router();
 
@@ -22,5 +23,6 @@ router.use("/products", productsRouter);
 router.use("/cart", cartRouter);
 router.use("/checkout/session", checkoutRouter);
 router.use("/orders", ordersRouter);
+router.use("/plans", plansRouter);
 
 export default router;

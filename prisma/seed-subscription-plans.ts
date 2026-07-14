@@ -36,7 +36,7 @@ async function upsertStripePriceForPlan(plan: typeof subscriptionPlans[number]) 
     return { productId: product.id, priceId: price.id };
 }
 
-async function seedSubscriptionPlans() {
+export async function seedSubscriptionPlans() {
     for (const plan of subscriptionPlans) {
         const { productId, priceId } = await upsertStripePriceForPlan(plan);
 
@@ -62,5 +62,3 @@ async function seedSubscriptionPlans() {
 
     console.log("Plans seeded successfully.");
 }
-
-seedSubscriptionPlans().catch(console.error).finally(() => prisma.$disconnect());
