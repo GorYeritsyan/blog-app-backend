@@ -189,12 +189,13 @@ model Plan {
   name            String
   slug            String  @unique
   price           Int
+  interval        String  @default("month")
   currency        String  @default("usd")
   stripeProductId String? @unique
   stripePriceId   String? @unique
   // isActive        Boolean  @default(true)
 
-  subscriptions Subscription[] // back-relation, no DB column — see previous answer
+  subscriptions Subscription[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

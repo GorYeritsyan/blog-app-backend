@@ -8,6 +8,9 @@ class CheckoutService {
             customer: customerId,
             mode: "payment",
             payment_method_types: ["card"],
+            saved_payment_method_options: {
+                payment_method_save: "enabled"
+            },
             line_items: items.map(item => ({
                 // price_data: {
                 //     currency: "usd",
