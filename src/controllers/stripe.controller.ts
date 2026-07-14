@@ -1,6 +1,7 @@
 import { type Request, type Response } from "express";
 import stripeService from "../services/stripe.service.js";
 import orderService from "../services/order.service.js";
+import subscriptionService from "../services/subscription.service.js";
 
 class StripeController {
     async handleWebhookEvent(req: Request, res: Response) {
@@ -22,14 +23,17 @@ class StripeController {
                 case "checkout.session.completed":
                     const session = event.data.object;
 
-                    if (session.payment_status === "paid" && session.metadata) {
+                    if (session.mode === "payment" && session.payment_status === "paid" && session.metadata) {
                         await orderService.createOrder({ userId: +session.metadata.userId, session });
                     }
+
                     break;
 
-                case "customer.subscription.created": {
-                    const session = event.data.object;
-                    console.log(session);
+                case "customer.subscription.created":
+                case "customer.subscription.updated":
+                case "customer.subscription.deleted": {
+                    const subscription = event.data.object;
+                    await subscriptionService.syncSubscription(subscription);
                     break;
                 }
 

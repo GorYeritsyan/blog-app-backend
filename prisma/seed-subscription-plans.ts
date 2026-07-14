@@ -4,6 +4,7 @@ import { stripe } from "../src/lib/stripe";
 const subscriptionPlans = [
     {
         name: "Pro Plan",
+        description: "Access to premium features.",
         slug: "pro",
         price: 30,
         interval: "month" as const
@@ -23,6 +24,7 @@ async function upsertStripePriceForPlan(plan: typeof subscriptionPlans[number]) 
 
     const product = await stripe.products.create({
         name: plan.name,
+        description: plan.description,
         metadata: { slug: plan.slug },
     });
 
@@ -44,6 +46,7 @@ export async function seedSubscriptionPlans() {
             where: { slug: plan.slug },
             update: {
                 name: plan.name,
+                description: plan.description,
                 price: plan.price,
                 interval: plan.interval,
                 stripeProductId: productId,
@@ -52,6 +55,7 @@ export async function seedSubscriptionPlans() {
             create: {
                 name: plan.name,
                 slug: plan.slug,
+                description: plan.description,
                 price: plan.price,
                 interval: plan.interval,
                 stripeProductId: productId,

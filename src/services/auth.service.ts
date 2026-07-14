@@ -8,7 +8,7 @@ import { UserDto } from "../dto/user.dto.js";
 
 class AuthService {
     async getMe(userId: number) {
-        return prisma.user.findUnique({ where: { id: userId }, include: { sentFriendRequests: true, receivedFriendRequests: true } });
+        return prisma.user.findUnique({ where: { id: userId }, include: { sentFriendRequests: true, receivedFriendRequests: true, subscriptions: true } });
     }
 
     // Login user service

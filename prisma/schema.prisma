@@ -185,14 +185,15 @@ model OrderItem {
 }
 
 model Plan {
-  id              Int     @id @default(autoincrement())
+  id              Int    @id @default(autoincrement())
   name            String
-  slug            String  @unique
+  description     String
+  slug            String @unique
   price           Int
-  interval        String  @default("month")
-  currency        String  @default("usd")
-  stripeProductId String? @unique
-  stripePriceId   String? @unique
+  interval        String @default("month")
+  currency        String @default("usd")
+  stripeProductId String @unique
+  stripePriceId   String @unique
   // isActive        Boolean  @default(true)
 
   subscriptions Subscription[]
