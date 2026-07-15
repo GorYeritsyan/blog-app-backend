@@ -144,3 +144,6 @@ vite.config.ts.timestamp-*
 .vite/
 /generated/prisma
 /src/generated
+
+uploads/products/*
+!uploads/products/.gitkeep

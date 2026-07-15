@@ -65,8 +65,8 @@ class CheckoutService {
                     price: plan.stripePriceId,
                     quantity: 1,
                 }],
-                success_url: `http://localhost:3000/pricing?session_id={CHECKOUT_SESSION_ID}`,
-                cancel_url: `http://localhost:3000/pricing`,
+                success_url: `http://localhost:3000/pricing/success?session_id={CHECKOUT_SESSION_ID}`,
+                cancel_url: `http://localhost:3000/pricing/cancel`,
 
                 // metadata: { planId: String(plan.id), userId: String(userId) },\
                 subscription_data: {

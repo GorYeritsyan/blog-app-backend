@@ -3,6 +3,13 @@ import { stripe } from "../src/lib/stripe";
 
 const subscriptionPlans = [
     {
+        name: "Basic Plan",
+        description: "Access to premium features.",
+        slug: "basic",
+        price: 10,
+        interval: "month" as const,
+    },
+    {
         name: "Pro Plan",
         description: "Access to premium features.",
         slug: "pro",
