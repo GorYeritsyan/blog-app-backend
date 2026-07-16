@@ -224,14 +224,14 @@ model Subscription {
 
 // AI Conversation
 enum AiMessageRole {
-  USER      @map("user")
-  ASSISTANT @map("assistant")
-  SYSTEM    @map("system")
+  USER
+  ASSISTANT
+  SYSTEM
 }
 
 enum AiMessageStatus {
-  OK    @map("ok")
-  ERROR @map("error")
+  OK
+  ERROR
 }
 
 model AiConversation {
