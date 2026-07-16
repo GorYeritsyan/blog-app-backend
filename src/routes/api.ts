@@ -11,6 +11,7 @@ import checkoutRouter from "./checkout.js";
 import ordersRouter from "./orders.js";
 import plansRouter from "./plans.js";
 import subscriptionsRouter from "./subscriptions.js";
+import chatRouter from "./chat.js";
 
 const router = Router();
 
@@ -26,5 +27,6 @@ router.use("/checkout/session", checkoutRouter);
 router.use("/orders", ordersRouter);
 router.use("/plans", plansRouter);
 router.use("/subscriptions", subscriptionsRouter);
+router.use("/chat", chatRouter);
 
 export default router;

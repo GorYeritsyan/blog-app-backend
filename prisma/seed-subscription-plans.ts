@@ -18,17 +18,7 @@ const subscriptionPlans = [
     }
 ];
 
-async function upsertStripePriceForPlan(plan: typeof subscriptionPlans[number]) {
-    // Try to find an existing product by metadata slug to avoid duplicates on re-run
-    const existing = await prisma.plan.findUnique({ where: { slug: plan.slug } });
-
-    if (existing?.stripeProductId && existing?.stripePriceId) {
-        return {
-            productId: existing.stripeProductId,
-            priceId: existing.stripePriceId,
-        };
-    }
-
+async function createStripePriceForPlan(plan: typeof subscriptionPlans[number]) {
     const product = await stripe.products.create({
         name: plan.name,
         description: plan.description,
@@ -46,8 +36,10 @@ async function upsertStripePriceForPlan(plan: typeof subscriptionPlans[number]) 
 }
 
 export async function seedSubscriptionPlans() {
+    await prisma.plan.deleteMany();
+
     for (const plan of subscriptionPlans) {
-        const { productId, priceId } = await upsertStripePriceForPlan(plan);
+        const { productId, priceId } = await createStripePriceForPlan(plan);
 
         await prisma.plan.upsert({
             where: { slug: plan.slug },

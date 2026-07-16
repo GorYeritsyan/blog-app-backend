@@ -7,4 +7,5 @@ export const {
     REFRESH_TOKEN_SECRET,
     STRIPE_SECRET_KEY,
     STRIPE_WEBHOOK_SECRET,
+    GROQ_API_KEY
 } = process.env;
