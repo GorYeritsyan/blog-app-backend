@@ -26,12 +26,13 @@ model User {
   // Requests that received this user
   receivedFriendRequests FriendRequest[] @relation("ReceivedRequests")
 
-  members       Member[]
-  messages      Message[]
-  products      Product[]
-  carts         Cart[]
-  orders        Order[]
-  subscriptions Subscription[]
+  members         Member[]
+  messages        Message[]
+  products        Product[]
+  carts           Cart[]
+  orders          Order[]
+  subscriptions   Subscription[]
+  aiConversations AiConversation[]
 }
 
 model Post {
@@ -219,4 +220,48 @@ model Subscription {
   updatedAt DateTime @updatedAt
 
   @@index([userId])
+}
+
+// AI Conversation
+enum AiMessageRole {
+  USER      @map("user")
+  ASSISTANT @map("assistant")
+  SYSTEM    @map("system")
+}
+
+enum AiMessageStatus {
+  OK    @map("ok")
+  ERROR @map("error")
+}
+
+model AiConversation {
+  id    Int     @id @default(autoincrement())
+  title String?
+
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+
+  messages AiMessage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model AiMessage {
+  id      Int    @id @default(autoincrement())
+  content String
+
+  role   AiMessageRole
+  status AiMessageStatus @default(OK)
+
+  // toolCalls Json?
+
+  conversation   AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  conversationId Int
+
+  createdAt DateTime @default(now())
+
+  @@index([conversationId])
 }
