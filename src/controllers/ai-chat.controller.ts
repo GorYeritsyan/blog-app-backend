@@ -1,7 +1,7 @@
 import aiChatService from "../services/ai-chat.service.js";
 import {AuthRequest} from "../types/types.js";
 import {Response} from "express";
-import {BadRequestError} from "../errors/index.js";
+import {AppError, BadRequestError} from "../errors/index.js";
 
 class AiChatController {
     async getAllConversations(req: AuthRequest, res: Response) {
@@ -30,13 +30,21 @@ class AiChatController {
         const conversation = await aiChatService.getOrCreateConversation({ userId: req.userId!, conversationId });
 
         // save user message in db
-        const userMessage = await aiChatService.saveMessage({ conversationId, content, role: "USER" });
-
-
+        await aiChatService.saveMessage({ conversationId: conversation.id, content, role: "USER" });
 
         // generate AI response and save it in the db
+        try {
+            const reply = await aiChatService.generateReply(conversation.id);
+            const assistantMessage = await aiChatService.saveMessage({ conversationId: conversation.id, role: "ASSISTANT", status: "OK", content: reply.content! });
 
-        res.status(201).json({ success: true });
+            res.status(201).json({ success: true, data: assistantMessage });
+        } catch (error) {
+            console.error("AI generation failed: ", error);
+
+            const errorMessage = await aiChatService.saveMessage({ conversationId: conversation.id, role: "ASSISTANT", status: "ERROR", content: "Sorry, I couldn't process that. Please try again." });
+
+            throw new AppError(errorMessage.content, 500);
+        }
     }
 }
 

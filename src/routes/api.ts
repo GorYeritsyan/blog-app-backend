@@ -29,6 +29,6 @@ router.use("/orders", ordersRouter);
 router.use("/plans", plansRouter);
 router.use("/subscriptions", subscriptionsRouter);
 // router.use("/chat", chatRouter);
-router.use("/ai-chat", aiChatRouter);
+router.use("/chat", aiChatRouter);
 
 export default router;
