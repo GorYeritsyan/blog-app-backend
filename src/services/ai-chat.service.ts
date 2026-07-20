@@ -4,9 +4,26 @@ import {prisma} from "../lib/prisma.js";
 import {NotFoundError} from "../errors/index.js";
 import {AiMessageRole, AiMessageStatus} from "../generated/prisma/enums.js";
 import {GROQ_API_KEY} from "../config/env.js";
-import {ChatCompletionMessageParam} from "groq-sdk/resources/chat/completions";
+import {ChatCompletionMessageParam, ChatCompletionTool} from "groq-sdk/resources/chat/completions";
 
 const groq = new Groq({ apiKey: GROQ_API_KEY });
+
+const tools: ChatCompletionTool[] = [
+    {
+        type: "function",
+        function: {
+            name: "search_products",
+            description: "Search the shop's product catalog by name, price or keyword",
+            parameters: {
+                type: "object",
+                properties: {
+                    query: { type: "string", description: "Search term, e.g. 'running shoes'" },
+                },
+                required: ["query"],
+            },
+        },
+    },
+];
 
 // todo: error handling
 class AiChatService {
