@@ -69,6 +69,9 @@ class AiChatService {
     async getAllConversations(userId: number) {
         return prisma.aiConversation.findMany({
             where: { userId },
+            orderBy: {
+                createdAt: "desc",
+            },
         });
     }
 
