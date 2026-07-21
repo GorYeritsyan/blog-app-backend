@@ -55,6 +55,32 @@ class ProductService {
         return { products, totalPages };
     }
 
+    async searchProductsForAI(args, currentUserId: number) {
+        const whereClause: Prisma.ProductWhereInput = {
+            ...(args.query && { title: { contains: args.query, mode: "insensitive" } }),
+            ...((args.minPrice || args.maxPrice) && {
+                price: {
+                    ...(args.minPrice && { gte: args.minPrice }),
+                    ...(args.maxPrice && { lte: args.maxPrice }),
+                }
+            }),
+            sellerId: { not: currentUserId },
+            isDeleted: false,
+        };
+
+        const { products } = await this.getProducts({
+            query: args.query,
+            page: "1",
+            limit: String(args.limit ?? 5),
+            orderBy: args.orderBy ?? "createdAt",
+            order: args.order ?? "desc",
+            currentUserId,
+            where: whereClause
+        });
+
+        return products;
+    }
+
     async getMyProducts({ query, page, limit, orderBy, order, currentUserId }: { query: string; page: string; limit: string; orderBy: string; order: "asc" | "desc", currentUserId: number }) {
         const whereClause: Prisma.ProductWhereInput = {
             ...(query && { title: { contains: query, mode: "insensitive" } }),
