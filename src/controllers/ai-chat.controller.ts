@@ -43,7 +43,8 @@ class AiChatController {
 
             const errorMessage = await aiChatService.saveMessage({ conversationId: conversation.id, role: "ASSISTANT", status: "ERROR", content: "Sorry, I couldn't process that. Please try again." });
 
-            throw new AppError(errorMessage.content, 500);
+            // throw new AppError(errorMessage.content, 500);
+            res.status(201).json({ success: true, data: errorMessage });
         }
     }
 }

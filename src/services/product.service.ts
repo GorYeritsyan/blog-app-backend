@@ -13,7 +13,7 @@ class ProductService {
         await fs.unlink(oldImagePath);
     }
 
-    async getProducts<T>({ query, page, limit, orderBy, order, currentUserId, where }: { query: string; page: string; limit: string; orderBy: string; order: "asc" | "desc", currentUserId: number; where: Prisma.ProductWhereInput }) {
+    async getProducts<T>({ page, limit, orderBy, order, where }: { page: string; limit: string | number; orderBy: string; order: "asc" | "desc", where: Prisma.ProductWhereInput }) {
         const skip = (+page - 1) * +limit;
 
         const products = await prisma.product.findMany({
@@ -50,7 +50,7 @@ class ProductService {
             isDeleted: false
         }
 
-        const { products, totalPages } = await this.getProducts({ query, page, limit, orderBy, order, currentUserId, where: whereClause });
+        const { products, totalPages } = await this.getProducts({ page, limit, orderBy, order, where: whereClause });
 
         return { products, totalPages };
     }
@@ -69,12 +69,10 @@ class ProductService {
         };
 
         const { products } = await this.getProducts({
-            query: args.query ?? "",
             page: "1",
-            limit: String(args.limit ?? 5),
+            limit: args.limit ?? 5,
             orderBy: args.orderBy ?? "createdAt",
             order: args.order ?? "desc",
-            currentUserId,
             where: whereClause
         });
 
@@ -88,7 +86,7 @@ class ProductService {
             isDeleted: false
         }
 
-        const { products, totalPages } = await this.getProducts({ query, page, limit, orderBy, order, currentUserId, where: whereClause });
+        const { products, totalPages } = await this.getProducts({ page, limit, orderBy, order, where: whereClause });
 
         return { products, totalPages };
     }

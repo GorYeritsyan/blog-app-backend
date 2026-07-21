@@ -14,7 +14,7 @@ const tools: ChatCompletionTool[] = [
         type: "function",
         function: {
             name: "search_products",
-            description: "Search the shop's product catalog by name, price or keyword",
+            description: "Search this shop's own product catalog to answer shop-specific questions: price, stock, availability, or when a listing was added. Use this whenever the user is asking whether the shop sells something or wants shop details on a product — not for general knowledge questions unrelated to this store's listings.",
             parameters: {
                 type: "object",
                 properties: {
@@ -41,8 +41,10 @@ const tools: ChatCompletionTool[] = [
                         description: "Sort direction. 'desc' for newest-first or highest-price-first, 'asc' for oldest-first or lowest-price-first.",
                     },
                     limit: {
-                        type: "number",
-                        description: "Number of results to return, default 5, max 10",
+                        type: "integer",
+                        minimum: 1,
+                        maximum: 10,
+                        description: "Number of results to return. Default 5 if omitted, max 10.",
                     },
                 },
                 required: [],
@@ -50,6 +52,17 @@ const tools: ChatCompletionTool[] = [
         },
     },
 ];
+const SYSTEM_MESSAGE = `You are a shop assistant for this online store.
+
+You can answer general knowledge questions about products (how something works, when it was originally released, brand history, etc.) using your own knowledge, just like any helpful assistant.
+
+But if the user is asking about THIS SHOP — price, stock/availability, whether you sell something, product listings, "do you have...", "how much is...", "when was it added" — you must call search_products and answer only from its results. Never guess or invent shop-specific details like price, stock, or listing date, even for a well-known product.
+
+If you're unsure whether the user means the shop or general knowledge, prefer calling search_products first — if it finds a match, treat the question as being about that listing.
+
+If search_products returns no results, say this shop doesn't carry it — don't fall back to general knowledge for those fields.
+
+You only get one search per user message. After results come back, answer directly — don't narrate that you're searching.`;
 
 // todo: error handling
 class AiChatService {
@@ -86,35 +99,60 @@ class AiChatService {
         return prisma.aiConversation.create({ data: { userId } });
     }
 
-    // async getHistory({ conversationId, limit = 20 }: { conversationId: number }) {
-    //     return prisma.aiMessage.findMany({
-    //         where: { conversationId, status: "OK", role: { not: "SYSTEM" } },
-    //         orderBy: { createdAt: "asc" },
-    //         take: limit
-    //     });
-    // }
+    async generateChatTitle(message: string) {
+        try {
+            const completion = await groq.chat.completions.create({
+                model: "llama-3.1-8b-instant",
+                messages: [
+                    {
+                        role: "system",
+                        content: "Generate a short, concise title (max 6 words) summarizing the user's message. Respond with ONLY the title, no quotes, no trailing punctuation."
+                    },
+                    {
+                        role: "user",
+                        content: message,
+                    }
+                ],
+                temperature: 0.3,
+            });
+
+            return completion.choices[0]?.message?.content?.trim() || "New Chat";
+        } catch (error) {
+            console.error("Title generation failed: ", error);
+            return "New Chat";
+        }
+    }
 
     async saveMessage({ conversationId, role, content, status = "OK" }: { conversationId: number; role: AiMessageRole; content: string; status?: AiMessageStatus }) {
-        return prisma.aiMessage.create({
+        const message = await prisma.aiMessage.create({
             data: {
                 content,
                 role,
                 status,
                 conversationId
             },
+            include: {
+                conversation: true
+            }
         });
+
+        if (!message.conversation.title) {
+            const title = await this.generateChatTitle(content);
+            await prisma.aiConversation.update({
+                where: { id: conversationId },
+                data: { title },
+            });
+        }
+
+        return message;
     }
 
     // Groq AI API call
     async getGroqChatCompletion(messages: ChatCompletionMessageParam[], currentUserId: number) {
-        let completion = await groq.chat.completions.create({
-            model: "llama-3.3-70b-versatile",
-            messages,
-            tools,
-            tool_choice: "auto"
-        });
+        let completion = await this.createCompletion(messages, true);
         console.log("completion", completion);
         let responseMessage = completion.choices[0].message;
+
         const toolCalls = responseMessage.tool_calls;
 
         if (toolCalls) {
@@ -133,17 +171,32 @@ class AiChatService {
                 });
             }
 
-            completion = await groq.chat.completions.create({
-                model: "llama-3.3-70b-versatile",
-                messages,
-            });
-
+            completion = await this.createCompletion(messages, false);
             responseMessage = completion.choices[0].message;
         }
 
         console.log("tool calls", toolCalls);
 
         return responseMessage;
+    }
+
+    private async createCompletion(messages: ChatCompletionMessageParam[], withTools: boolean) {
+        try {
+            return await groq.chat.completions.create({
+                model: "llama-3.3-70b-versatile",
+                messages,
+                ...(withTools ? { tools, tool_choice: "auto" } : {}),
+            });
+        } catch (error: any) {
+            if (error?.error?.error?.code === "tool_use_failed") {
+                return groq.chat.completions.create({
+                    model: "llama-3.3-70b-versatile",
+                    messages,
+                });
+            }
+
+            throw error;
+        }
     }
 
     async getChatHistory(conversationId: number, limit = 20) {
@@ -166,10 +219,9 @@ class AiChatService {
         const history = await this.getChatHistory(conversationId);
         const systemMessage: ChatCompletionMessageParam = {
             role: "system",
-            content: "You are a shop assistant. Use search_products to find real products before recommending anything — never invent prices or stock. Keep answers short and friendly.",
+            content: SYSTEM_MESSAGE,
         };
 
-        // const messages = [{ role: "SYSTEM", content: "" }, ...history];
         const messages = [systemMessage, ...history];
 
         return await this.getGroqChatCompletion(messages as ChatCompletionMessageParam[], currentUserId);
