@@ -55,7 +55,7 @@ class ProductService {
         return { products, totalPages };
     }
 
-    async searchProductsForAI(args, currentUserId: number) {
+    async searchProductsForAI(args: { query?: string; minPrice?: number; maxPrice?: number; limit?: string; orderBy?: string, order?: "asc" | "desc"}, currentUserId: number) {
         const whereClause: Prisma.ProductWhereInput = {
             ...(args.query && { title: { contains: args.query, mode: "insensitive" } }),
             ...((args.minPrice || args.maxPrice) && {
@@ -69,7 +69,7 @@ class ProductService {
         };
 
         const { products } = await this.getProducts({
-            query: args.query,
+            query: args.query ?? "",
             page: "1",
             limit: String(args.limit ?? 5),
             orderBy: args.orderBy ?? "createdAt",
