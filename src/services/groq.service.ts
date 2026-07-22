@@ -105,6 +105,20 @@ const tools: ChatCompletionTool[] = [
                 additionalProperties: false
             }
         }
+    },
+
+    // create checkout session
+    {
+        type: "function",
+        function: {
+            name: "create_checkout_session",
+            description: "Create a Stripe checkout session for all items currently in the user's cart, and return the checkout URL",
+            parameters: {
+                type: "object",
+                properties: {},
+                additionalProperties: false
+            }
+        }
     }
 ];
 

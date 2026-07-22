@@ -15,13 +15,6 @@ class CheckoutService {
                 payment_method_save: "enabled"
             },
             line_items: items.map(item => ({
-                // price_data: {
-                //     currency: "usd",
-                //     product_data: {
-                //         name: item.product.title,
-                //     },
-                //     unit_amount: item.product.price * 100
-                // },
                 price: item.product.stripePriceId,
                 quantity: item.quantity,
             })),
