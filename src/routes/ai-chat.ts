@@ -12,4 +12,7 @@ router.get("/conversations/:id", aiChatController.getConversation);
 // POST /api/chat/messages
 router.post("/messages", aiChatController.sendMessage);
 
+// DELETE /api/chat/conversations/:id
+router.delete("/conversations/:id", aiChatController.removeConversation);
+
 export default router;

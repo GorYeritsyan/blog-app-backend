@@ -47,6 +47,14 @@ class AiChatController {
             res.status(201).json({ success: true, data: errorMessage });
         }
     }
+
+    async removeConversation(req: AuthRequest<{ id: string }>, res: Response) {
+        const { id } = req.params;
+
+        const removedConversation = await aiChatService.removeConversation({ conversationId: +id, userId: req.userId! });
+
+        res.status(200).json({ success: true, data: removedConversation });
+    }
 }
 
 export default new AiChatController();
