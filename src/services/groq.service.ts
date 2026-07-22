@@ -3,6 +3,7 @@ import {ChatCompletionMessageParam, ChatCompletionTool} from "groq-sdk/resources
 import {GROQ_API_KEY} from "../config/env.js";
 import productService from "./product.service.js";
 import {BadRequestError} from "../errors/index.js";
+import cartService from "./cart.service.js";
 
 const groq = new Groq({ apiKey: GROQ_API_KEY });
 
@@ -53,7 +54,21 @@ const tools: ChatCompletionTool[] = [
         type: "function",
         function: {
             name: "add_to_cart",
-            description: "Add to a cart",
+            description: "Add a specific product to the user's cart",
+            parameters: {
+                type: "object",
+                properties: {
+                    productId: {
+                        type: "number",
+                        description: "The id of the product to add to cart"
+                    },
+                    quantity: {
+                        type: "number",
+                        description: "How many units to add, default 1",
+                    }
+                },
+                required: ["productId"],
+            }
         }
     }
 ];
@@ -105,14 +120,31 @@ class GroqService {
             messages.push(responseMessage);
 
             for (const call of toolCalls) {
-                const args = JSON.parse(call.function.arguments);
-                const results = await productService.searchProductsForAI(args, currentUserId);
+                if (call.function.name === "add_to_cart") {
+                    const args = JSON.parse(call.function.arguments);
 
-                messages.push({
-                    role: "tool",
-                    tool_call_id: call.id,
-                    content: JSON.stringify(results),
-                });
+                    try {
+                        await cartService.addToCart({
+                            productId: args.productId,
+                            quantity: args.quantity ?? 1,
+                            currentUserId,
+                        });
+                    } catch (err) {
+                        messages.push({
+                            role: "tool",
+                            tool_call_id: call.id,
+                            content: JSON.stringify({ error: "Failed to add item to cart", reason: (err as Error).message }),
+                        });
+                    }
+
+                    const results = await cartService.getCartItems(currentUserId!);
+
+                    messages.push({
+                        role: "tool",
+                        tool_call_id: call.id,
+                        content: JSON.stringify(results),
+                    });
+                }
             }
 
             completion = await this.createCompletion(messages, false);

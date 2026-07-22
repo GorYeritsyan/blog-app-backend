@@ -3,6 +3,8 @@ import { NotFoundError } from "../errors/index.js";
 import { AiMessageRole, AiMessageStatus } from "../generated/prisma/enums.js";
 import { ChatCompletionMessageParam } from "groq-sdk/resources/chat/completions";
 import groqService from "./groq.service.js";
+import productService from "./product.service.js";
+import {Product} from "../types/types.js";
 
 const SYSTEM_MESSAGE = `You are a helpful AI sales assistant for an online shop. Your role is strictly limited to assisting users with product inquiries by searching the store's inventory.
 
@@ -13,6 +15,28 @@ Guidelines:
 - **Tone & Pacing:** Be polite, concise, and direct. Keep responses brief and ask a maximum of one follow-up question at a time.`;
 
 class AiChatService {
+    private generateSystemMessage(products: unknown): ChatCompletionMessageParam {
+        return {
+            role: "system",
+            content: `You are a helpful shopping assistant for an online shop.
+
+                Here is the current product list:
+            ${JSON.stringify(products, null, 2)}
+
+        Each product only has: title, price, currency, and when it was added (createdAt). You do not have access to stock levels, materials, specifications, seller info, or shipping details.
+
+            Guidelines:
+        - Answer questions about product titles, prices, and currency directly.
+        - If asked "what's new" or about recently added products, use createdAt to compare.
+        - Always include the currency when mentioning a price (e.g. "$19.99" or "19.99 USD").
+        - If asked for info you don't have (materials, size, color, stock, shipping, seller), politely say that detail isn't available.
+        - Do not invent or guess specifications or features beyond the title.
+        - Keep responses short, friendly, and to the point.
+        - If asked about a product not in the list, say it's not available.
+        - If asked something unrelated to the shop or its products, gently redirect the conversation back to the shop.`
+        }
+    }
+
     // Get All conversations
     async getAllConversations(userId: number) {
         return prisma.aiConversation.findMany({
@@ -98,10 +122,8 @@ class AiChatService {
     async generateReply(conversationId: number, currentUserId: number) {
         const history = await this.getChatHistory(conversationId);
 
-        const systemMessage: ChatCompletionMessageParam = {
-            role: "system",
-            content: SYSTEM_MESSAGE,
-        };
+        const { products } = await productService.getAllProducts({ query: "", currentUserId, orderBy: "createdAt", order: "desc", limit: "30", page: "1" });
+        const systemMessage = this.generateSystemMessage(products);
 
         const messages = [systemMessage, ...history];
 
