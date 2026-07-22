@@ -39,12 +39,23 @@ class AiChatController {
 
             res.status(201).json({ success: true, data: assistantMessage });
         } catch (error) {
-            console.error("AI generation failed: ", error);
+            console.error("AI generation failed:", error);
 
-            const errorMessage = await aiChatService.saveMessage({ conversationId: conversation.id, role: "ASSISTANT", status: "ERROR", content: "Sorry, I couldn't process that. Please try again." });
+            // Distinguish user-facing cause vs internal failure
+            const isRateLimit = error instanceof BadRequestError;
+            const fallbackContent = isRateLimit
+                ? "We're getting a lot of requests right now — please try again in a moment."
+                : "Sorry, I couldn't process that. Please try again.";
 
-            // throw new AppError(errorMessage.content, 500);
-            res.status(201).json({ success: true, data: errorMessage });
+            const errorMessage = await aiChatService.saveMessage({
+                conversationId: conversation.id,
+                role: "ASSISTANT",
+                status: "ERROR",
+                content: fallbackContent,
+            });
+
+            // Still succeeds at the HTTP level — the "failure" is inside the conversation, not the request
+            return res.status(201).json({ success: true, data: errorMessage });
         }
     }
 

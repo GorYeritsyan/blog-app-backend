@@ -2,6 +2,7 @@ import {Groq} from "groq-sdk";
 import {ChatCompletionMessageParam, ChatCompletionTool} from "groq-sdk/resources/chat/completions";
 import {GROQ_API_KEY} from "../config/env.js";
 import productService from "./product.service.js";
+import {BadRequestError} from "../errors/index.js";
 
 const groq = new Groq({ apiKey: GROQ_API_KEY });
 
@@ -44,9 +45,17 @@ const tools: ChatCompletionTool[] = [
                     },
                 },
                 required: [],
+                additionalProperties: false,
             },
         },
     },
+    {
+        type: "function",
+        function: {
+            name: "add_to_cart",
+            description: "Add to a cart",
+        }
+    }
 ];
 
 class GroqService {
@@ -54,16 +63,31 @@ class GroqService {
     private async createCompletion(messages: ChatCompletionMessageParam[], withTools: boolean) {
         try {
             return await groq.chat.completions.create({
-                model: "llama-3.3-70b-versatile",
+                // model: "llama-3.3-70b-versatile",
+                model: "llama-3.1-8b-instant",
                 messages,
                 ...(withTools ? { tools, tool_choice: "auto" } : {}),
             });
         } catch (error: any) {
-            if (error?.error?.error?.code === "tool_use_failed") {
-                return groq.chat.completions.create({
-                    model: "llama-3.3-70b-versatile",
-                    messages,
-                });
+            const code = error?.error?.error?.code;
+
+            if (code === "rate_limit_exceeded") {
+                console.error("Rate limit:", error?.error?.error);
+                throw new BadRequestError("Rate limit exceeded.");
+            }
+
+            if (code === "tool_use_failed") {
+                console.error("Tool use failed, retrying without tools:", error?.error?.error);
+                try {
+                    return await groq.chat.completions.create({
+                        // model: "llama-3.3-70b-versatile",
+                        model: "llama-3.1-8b-instant",
+                        messages,
+                    });
+                } catch (retryError) {
+                    console.error("Retry without tools also failed:", retryError);
+                    throw retryError;
+                }
             }
 
             throw error;
