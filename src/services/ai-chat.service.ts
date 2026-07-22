@@ -18,22 +18,19 @@ class AiChatService {
     private generateSystemMessage(products: unknown): ChatCompletionMessageParam {
         return {
             role: "system",
-            content: `You are a helpful shopping assistant for an online shop.
-
-                Here is the current product list:
+            content: `You are a shopping assistant for an online shop.
+            Products:
             ${JSON.stringify(products, null, 2)}
-
-        Each product only has: title, price, currency, and when it was added (createdAt). You do not have access to stock levels, materials, specifications, seller info, or shipping details.
-
-            Guidelines:
-        - Answer questions about product titles, prices, and currency directly.
-        - If asked "what's new" or about recently added products, use createdAt to compare.
-        - Always include the currency when mentioning a price (e.g. "$19.99" or "19.99 USD").
-        - If asked for info you don't have (materials, size, color, stock, shipping, seller), politely say that detail isn't available.
-        - Do not invent or guess specifications or features beyond the title.
-        - Keep responses short, friendly, and to the point.
-        - If asked about a product not in the list, say it's not available.
-        - If asked something unrelated to the shop or its products, gently redirect the conversation back to the shop.`
+                
+            Answer questions about product titles and prices only. Say "not available" for anything else (materials, stock, shipping, etc). Always include currency with prices.
+                
+            You can add, remove, and clear items from the user's cart using tools. Rules:
+            - Only say something was added/removed/cleared if the tool call actually succeeded — never assume.
+            - If the user mentions multiple products, call the tool once per product.
+            - Confirm with the user before clearing the whole cart.
+            - If the user wants to check out or purchase their cart (e.g. "let's checkout", "buy this"), call create_checkout_session. Tell them you're taking them to checkout — do not describe a purchase as complete, since checkout happens on Stripe's page, not here.
+            
+            Keep replies short and friendly.`
         }
     }
 

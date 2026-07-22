@@ -70,6 +70,41 @@ const tools: ChatCompletionTool[] = [
                 required: ["productId"],
             }
         }
+    },
+
+    // Remove specific cart item
+    {
+        type: "function",
+        function: {
+            name: "remove_cart_item",
+            description: "Remove a specific product from the user's cart",
+            parameters: {
+                type: "object",
+                properties: {
+                    productId: {
+                        type: "number",
+                        description: "The id of the product to remove from the cart"
+                    }
+                },
+                required: ["productId"],
+                additionalProperties: false
+            }
+        }
+    },
+
+    // Remove all cart items
+    {
+        type: "function",
+        function: {
+            name: "clear_cart_items",
+            description: "Remove all items from the user's cart, emptying it completely",
+            parameters: {
+                type: "object",
+                properties: {},
+                required: [],
+                additionalProperties: false
+            }
+        }
     }
 ];
 
@@ -120,31 +155,39 @@ class GroqService {
             messages.push(responseMessage);
 
             for (const call of toolCalls) {
-                if (call.function.name === "add_to_cart") {
-                    const args = JSON.parse(call.function.arguments);
+                const args = JSON.parse(call.function.arguments);
 
-                    try {
+                try {
+                    if (call.function.name === "add_to_cart") {
                         await cartService.addToCart({
                             productId: args.productId,
                             quantity: args.quantity ?? 1,
                             currentUserId,
                         });
-                    } catch (err) {
-                        messages.push({
-                            role: "tool",
-                            tool_call_id: call.id,
-                            content: JSON.stringify({ error: "Failed to add item to cart", reason: (err as Error).message }),
+                    } else if (call.function.name === "remove_cart_item") {
+                        await cartService.removeCartItem({
+                            currentUserId,
+                            productId: args.productId,
                         });
+                    } else if (call.function.name === "clear_cart_items") {
+                        await cartService.clearCartItems(currentUserId);
                     }
-
-                    const results = await cartService.getCartItems(currentUserId!);
-
+                } catch (err) {
                     messages.push({
                         role: "tool",
                         tool_call_id: call.id,
-                        content: JSON.stringify(results),
+                        content: JSON.stringify({ error: "Cart operation failed", reason: (err as Error).message }),
                     });
+                    continue;
                 }
+
+                const results = await cartService.getCartItems(currentUserId);
+
+                messages.push({
+                    role: "tool",
+                    tool_call_id: call.id,
+                    content: JSON.stringify(results),
+                });
             }
 
             completion = await this.createCompletion(messages, false);
