@@ -34,10 +34,10 @@ class AiChatController {
 
         // generate AI response and save it in the db
         try {
-            const reply = await aiChatService.generateReply(conversation.id, req.userId!);
+            const { message: reply, checkoutUrl } = await aiChatService.generateReply(conversation.id, req.userId!);
             const assistantMessage = await aiChatService.saveMessage({ conversationId: conversation.id, role: "ASSISTANT", status: "OK", content: reply.content! });
 
-            res.status(201).json({ success: true, data: assistantMessage });
+            res.status(201).json({ success: true, data: { message: assistantMessage, checkoutUrl } });
         } catch (error) {
             console.error("AI generation failed:", error);
 

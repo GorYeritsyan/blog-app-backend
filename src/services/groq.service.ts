@@ -1,55 +1,18 @@
 import {Groq} from "groq-sdk";
-import {ChatCompletionMessageParam, ChatCompletionTool} from "groq-sdk/resources/chat/completions";
+import {
+    ChatCompletionMessage,
+    ChatCompletionMessageParam,
+    ChatCompletionTool
+} from "groq-sdk/resources/chat/completions";
 import {GROQ_API_KEY} from "../config/env.js";
-import productService from "./product.service.js";
 import {BadRequestError} from "../errors/index.js";
 import cartService from "./cart.service.js";
+import checkoutService from "./checkout.service.js";
+import customerService from "./customer.service.js";
 
 const groq = new Groq({ apiKey: GROQ_API_KEY });
 
 const tools: ChatCompletionTool[] = [
-    {
-        type: "function",
-        function: {
-            name: "search_products",
-            description: "Search this shop's own product catalog to answer shop-specific questions: price, stock, availability, or when a listing was added. Use this whenever the user is asking whether the shop sells something or wants shop details on a product — not for general knowledge questions unrelated to this store's listings.",
-            parameters: {
-                type: "object",
-                properties: {
-                    query: {
-                        type: "string",
-                        description: "Keyword to search in product title, e.g. 'running shoes'. Leave empty to browse without a keyword filter.",
-                    },
-                    minPrice: {
-                        type: "number",
-                        description: "Minimum price in USD, only if user mentions a lower bound, e.g. 'above $50'",
-                    },
-                    maxPrice: {
-                        type: "number",
-                        description: "Maximum price in USD, only if user mentions an upper bound, e.g. 'under $100' or 'between $50 and $100'",
-                    },
-                    orderBy: {
-                        type: "string",
-                        enum: ["createdAt", "price"],
-                        description: "Field to sort by. Use 'createdAt' for newest/latest products, 'price' for price-based sorting.",
-                    },
-                    order: {
-                        type: "string",
-                        enum: ["asc", "desc"],
-                        description: "Sort direction. 'desc' for newest-first or highest-price-first, 'asc' for oldest-first or lowest-price-first.",
-                    },
-                    limit: {
-                        type: "integer",
-                        minimum: 1,
-                        maximum: 10,
-                        description: "Number of results to return. Default 5 if omitted, max 10.",
-                    },
-                },
-                required: [],
-                additionalProperties: false,
-            },
-        },
-    },
     {
         type: "function",
         function: {
@@ -124,12 +87,13 @@ const tools: ChatCompletionTool[] = [
 
 class GroqService {
     // Helper method to create chat completion
-    private async createCompletion(messages: ChatCompletionMessageParam[], withTools: boolean) {
+    private async createCompletion(messages: ChatCompletionMessageParam[], withTools: boolean, temperature?: number) {
         try {
             return await groq.chat.completions.create({
-                // model: "llama-3.3-70b-versatile",
-                model: "llama-3.1-8b-instant",
+                model: "llama-3.3-70b-versatile",
+                // model: "llama-3.1-8b-instant",
                 messages,
+                temperature: temperature ?? 0.2,
                 ...(withTools ? { tools, tool_choice: "auto" } : {}),
             });
         } catch (error: any) {
@@ -141,16 +105,21 @@ class GroqService {
             }
 
             if (code === "tool_use_failed") {
-                console.error("Tool use failed, retrying without tools:", error?.error?.error);
+                console.error("Tool use failed, retrying with tools at lower temperature:", error?.error?.error);
                 try {
                     return await groq.chat.completions.create({
-                        // model: "llama-3.3-70b-versatile",
-                        model: "llama-3.1-8b-instant",
+                        model: "llama-3.3-70b-versatile",
                         messages,
+                        temperature: 0,
+                        ...(withTools ? { tools, tool_choice: "auto" } : {}),
                     });
-                } catch (retryError) {
-                    console.error("Retry without tools also failed:", retryError);
-                    throw retryError;
+                } catch (retryError: any) {
+                    console.error("Retry with tools also failed, falling back to no tools:", retryError);
+                    return groq.chat.completions.create({
+                        model: "llama-3.3-70b-versatile",
+                        messages,
+                        temperature: 0.2,
+                    });
                 }
             }
 
@@ -158,20 +127,44 @@ class GroqService {
         }
     }
 
+    private hasRawFunctionSyntax(message: ChatCompletionMessage) {
+        const rawFunctionCallPattern = /<function=.*?>.*?<\/function>/s;
+        return !!(message.content && rawFunctionCallPattern.test(message.content));
+    }
+
     // Groq AI API call, generate reply using tools
     async getGroqChatCompletion(messages: ChatCompletionMessageParam[], currentUserId: number) {
         let completion = await this.createCompletion(messages, true);
         let responseMessage = completion.choices[0].message;
 
+        // retry once if the model leaked raw function syntax instead of a real tool_call
+        if (this.hasRawFunctionSyntax(responseMessage)) {
+            console.error("Model leaked raw function-call syntax, retrying:", responseMessage.content);
+            completion = await this.createCompletion(messages, true, 0);
+            responseMessage = completion.choices[0].message;
+
+            if (this.hasRawFunctionSyntax(responseMessage)) {
+                throw new BadRequestError("malformed_tool_call");
+            }
+        }
+
+        // retry once if the model returned nothing usable at all
+        if (!responseMessage.tool_calls && !responseMessage.content?.trim()) {
+            console.error("Empty response with no tool calls, retrying");
+            completion = await this.createCompletion(messages, true, 0);
+            responseMessage = completion.choices[0].message;
+        }
+
         const toolCalls = responseMessage.tool_calls;
+        let checkoutUrl;
 
         if (toolCalls) {
             messages.push(responseMessage);
 
             for (const call of toolCalls) {
-                const args = JSON.parse(call.function.arguments);
-
                 try {
+                    const args = JSON.parse(call.function.arguments);
+
                     if (call.function.name === "add_to_cart") {
                         await cartService.addToCart({
                             productId: args.productId,
@@ -185,6 +178,31 @@ class GroqService {
                         });
                     } else if (call.function.name === "clear_cart_items") {
                         await cartService.clearCartItems(currentUserId);
+                    } else if (call.function.name === "create_checkout_session") {
+                        try {
+                            const cartItems = await cartService.getCartItems(currentUserId);
+
+                            if (cartItems.length === 0) {
+                                messages.push({ role: "tool", tool_call_id: call.id, content: JSON.stringify({ error: "Cart is empty, nothing to checkout" }) });
+                                continue;
+                            }
+
+                            const missingPrice = cartItems.find(item => !item.product.stripePriceId);
+                            if (missingPrice) {
+                                messages.push({ role: "tool", tool_call_id: call.id, content: JSON.stringify({ error: `"${missingPrice.product.title}" isn't available for checkout right now` }) });
+                                continue;
+                            }
+
+                            const customerId = await customerService.upsertStripeCustomer(currentUserId);
+                            const session = await checkoutService.createCheckoutSession({ items: cartItems as any, userId: currentUserId, customerId });
+
+                            messages.push({ role: "tool", tool_call_id: call.id, content: JSON.stringify({ checkoutUrl: session.url }) });
+                            checkoutUrl = session.url;
+                            continue;
+                        } catch (err) {
+                            messages.push({ role: "tool", tool_call_id: call.id, content: JSON.stringify({ error: "Failed to create checkout session", reason: (err as Error).message }) });
+                            continue;
+                        }
                     }
                 } catch (err) {
                     messages.push({
@@ -206,9 +224,16 @@ class GroqService {
 
             completion = await this.createCompletion(messages, false);
             responseMessage = completion.choices[0].message;
+
+            if (!responseMessage.content?.trim()) {
+                console.error("Empty final response, retrying");
+                completion = await this.createCompletion(messages, false, 0);
+                responseMessage = completion.choices[0].message;
+            }
         }
 
-        return responseMessage;
+        console.log("AI response", responseMessage);
+        return { message: responseMessage, checkoutUrl };
     }
 
     async generateChatTitle(message: string) {

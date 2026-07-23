@@ -1,9 +1,8 @@
 import { stripe } from "../lib/stripe.js";
 import { CartItem } from "../types/types.js";
-import {Plan} from "../generated/prisma/client.js";
-import {prisma} from "../lib/prisma.js";
-import {BadRequestError} from "../errors/index.js";
-import {ConflictError} from "../errors/http.error.js";
+import { Plan } from "../generated/prisma/client.js";
+import { prisma } from "../lib/prisma.js";
+import { ConflictError } from "../errors/http.error.js";
 
 class CheckoutService {
     async createCheckoutSession({ items, userId, customerId }: { items: CartItem[]; userId: number; customerId: string }) {
@@ -44,17 +43,6 @@ class CheckoutService {
                     payment_method_save: "enabled"
                 },
                 line_items: [{
-                    // price_data: {
-                    //     currency: "usd",
-                    //     product_data: {
-                    //         name: plan.name,
-                    //     },
-                    //     unit_amount: plan.price * 100,
-                    //
-                    //     recurring: {
-                    //         interval: "month"
-                    //     }
-                    // },
                     price: plan.stripePriceId,
                     quantity: 1,
                 }],

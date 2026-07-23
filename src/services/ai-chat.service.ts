@@ -4,31 +4,44 @@ import { AiMessageRole, AiMessageStatus } from "../generated/prisma/enums.js";
 import { ChatCompletionMessageParam } from "groq-sdk/resources/chat/completions";
 import groqService from "./groq.service.js";
 import productService from "./product.service.js";
-import {Product} from "../types/types.js";
-
-const SYSTEM_MESSAGE = `You are a helpful AI sales assistant for an online shop. Your role is strictly limited to assisting users with product inquiries by searching the store's inventory.
-
-Guidelines:
-- **Strict Domain Boundary:** You ONLY answer questions about this shop and its products. Politely decline any off-topic, general knowledge, or personal questions, explaining that you can only assist with this store's listings.
-- **Mandatory Tool Usage:** Always call 'search_products' to check inventory before answering product queries. Never assume product details or fabricate items.
-- **Product Information:** Store items only have titles and prices. If users ask for detailed specifications or extra information, inform them that only basic details (title and price) are available for these listings.
-- **Tone & Pacing:** Be polite, concise, and direct. Keep responses brief and ask a maximum of one follow-up question at a time.`;
+import {CartItem, Product} from "../types/types.js";
+import cartService from "./cart.service.js";
 
 class AiChatService {
-    private generateSystemMessage(products: unknown): ChatCompletionMessageParam {
+    private generateSystemMessage({ products, cartItems }: any): ChatCompletionMessageParam {
+        const productsDto = products.map((p: Product) => ({
+            id: p.id,
+            title: p.title,
+            createdAt: p.createdAt,
+            price: p.price,
+            updatedAt: p.updatedAt
+        }));
+
+        const cartItemsDto = cartItems.map((item: CartItem) => ({
+            id: item.id,
+            productId: item.productId,
+            title: item.product.title,
+            price: item.product.price,
+            quantity: item.quantity
+        }));
+
         return {
             role: "system",
             content: `You are a shopping assistant for an online shop.
             Products:
-            ${JSON.stringify(products, null, 2)}
+            ${JSON.stringify(productsDto, null, 2)}
+            Cart:
+            ${JSON.stringify(cartItemsDto, null, 2)}
                 
             Answer questions about product titles and prices only. Say "not available" for anything else (materials, stock, shipping, etc). Always include currency with prices.
-                
+            
             You can add, remove, and clear items from the user's cart using tools. Rules:
             - Only say something was added/removed/cleared if the tool call actually succeeded — never assume.
             - If the user mentions multiple products, call the tool once per product.
-            - Confirm with the user before clearing the whole cart.
             - If the user wants to check out or purchase their cart (e.g. "let's checkout", "buy this"), call create_checkout_session. Tell them you're taking them to checkout — do not describe a purchase as complete, since checkout happens on Stripe's page, not here.
+            - Don't show Stripe session URL, just say that redirecting to checkout page
+            
+            After a cart action (add, remove, clear, checkout), only confirm what happened based on the exact result returned by the tool. If the tool result shows no change occurred, or shows a different quantity than expected, tell the customer honestly what the cart actually contains — never assume an action succeeded.
             
             Keep replies short and friendly.`
         }
@@ -120,7 +133,9 @@ class AiChatService {
         const history = await this.getChatHistory(conversationId);
 
         const { products } = await productService.getAllProducts({ query: "", currentUserId, orderBy: "createdAt", order: "desc", limit: "30", page: "1" });
-        const systemMessage = this.generateSystemMessage(products);
+        const cartItems = await cartService.getCartItems(currentUserId);
+
+        const systemMessage = this.generateSystemMessage({ products, cartItems });
 
         const messages = [systemMessage, ...history];
 
